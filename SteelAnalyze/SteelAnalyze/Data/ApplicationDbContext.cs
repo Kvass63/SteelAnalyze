@@ -1,30 +1,54 @@
-﻿using SteelAnalyze.Models;
+using Microsoft.EntityFrameworkCore;
+using SteelAnalyze.Auth;
+using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Data
 {
-    public class ApplicationDbContext
+    public class ApplicationDbContext : DbContext
     {
-        public List<DefectCategory> Categories { get; set; } = new();
-        public List<InspectionSession> Sessions { get; set; } = new();
-
-        public ApplicationDbContext()
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            // Инициализация тестовыми данными (Seed Data)
-            Categories = new List<DefectCategory>
+        }
+
+        public DbSet<AppUser> Users => Set<AppUser>();
+        public DbSet<DefectClass> DefectClasses => Set<DefectClass>();
+        public DbSet<ReferenceSample> ReferenceSamples => Set<ReferenceSample>();
+        public DbSet<Inspection> Inspections => Set<Inspection>();
+        public DbSet<InspectionNeighbor> InspectionNeighbors => Set<InspectionNeighbor>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AppUser>().HasIndex(u => u.Username).IsUnique();
+            modelBuilder.Entity<DefectClass>().HasIndex(c => c.Code).IsUnique();
+
+            // Класс и пользователя нельзя удалить, пока на них ссылаются эталоны или журнал
+            modelBuilder.Entity<ReferenceSample>(e =>
             {
-                new DefectCategory { Id = 1, Name = "Crack", Description = "Трещина", SeverityLevel = 9 },
-                new DefectCategory { Id = 2, Name = "Scratch", Description = "Царапина", SeverityLevel = 4 },
-                new DefectCategory { Id = 3, Name = "Inclusion", Description = "Включение", SeverityLevel = 6 }
-            };
+                e.HasOne(r => r.DefectClass).WithMany().HasForeignKey(r => r.DefectClassId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(r => r.AddedBy).WithMany().HasForeignKey(r => r.AddedByUserId).OnDelete(DeleteBehavior.Restrict);
+            });
 
-            var session1 = new InspectionSession { Id = 1, FileName = "batch_001.jpg" };
-            session1.AddDefect(new DefectInstance { Id = 101, CategoryId = 1, ConfidenceScore = 0.92, ImageUrl = "/img/1.jpg" });
-            session1.AddDefect(new DefectInstance { Id = 102, CategoryId = 2, ConfidenceScore = 0.45, ImageUrl = "/img/2.jpg" });
+            modelBuilder.Entity<Inspection>(e =>
+            {
+                e.HasOne(i => i.PredictedClass).WithMany().HasForeignKey(i => i.PredictedClassId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(i => i.Operator).WithMany().HasForeignKey(i => i.OperatorId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(i => i.ReviewedBy).WithMany().HasForeignKey(i => i.ReviewedByUserId).OnDelete(DeleteBehavior.Restrict);
 
-            var session2 = new InspectionSession { Id = 2, FileName = "batch_002.jpg" };
-            session2.AddDefect(new DefectInstance { Id = 201, CategoryId = 3, ConfidenceScore = 0.88, ImageUrl = "/img/3.jpg" });
+                // Вердикты хранятся в базе словами, а не числами
+                e.Property(i => i.Verdict).HasConversion<string>();
+                e.Property(i => i.FinalVerdict).HasConversion<string>();
 
-            Sessions = new List<InspectionSession> { session1, session2 };
+                // Ближайшие эталоны удаляются вместе с записью журнала
+                e.HasMany(i => i.Neighbors).WithOne().HasForeignKey(n => n.InspectionId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<InspectionNeighbor>(e =>
+            {
+                e.HasOne(n => n.DefectClass).WithMany().HasForeignKey(n => n.DefectClassId).OnDelete(DeleteBehavior.Restrict);
+
+                // При удалении эталона строка журнала остаётся, ссылка на эталон очищается
+                e.HasOne(n => n.ReferenceSample).WithMany().HasForeignKey(n => n.ReferenceSampleId).OnDelete(DeleteBehavior.SetNull);
+            });
         }
     }
 }

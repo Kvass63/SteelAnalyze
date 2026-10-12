@@ -1,7 +1,10 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SteelAnalyze.Auth;
 using SteelAnalyze.Data;
+using SteelAnalyze.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,14 +28,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+// Перечисления (вердикт, зона) передаются в JSON словами, а не числами
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-builder.Services.AddSingleton<ApplicationDbContext>();
-builder.Services.AddSingleton<UserStore>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddSingleton<ImageStorage>();
+// Заменяется реализацией на нейросети после обучения модели
+builder.Services.AddSingleton<IEmbeddingExtractor, UnavailableEmbeddingExtractor>();
+builder.Services.AddScoped<RecognitionService>();
 
 var app = builder.Build();
+
+// Создание и обновление базы по миграциям, начальное заполнение
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+    DbSeeder.Seed(db);
+}
 
 if (app.Environment.IsDevelopment())
 {

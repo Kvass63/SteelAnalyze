@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SteelAnalyze.Auth;
+using SteelAnalyze.Data;
 using SteelAnalyze.Dtos;
 
 namespace SteelAnalyze.Controllers
@@ -12,12 +13,12 @@ namespace SteelAnalyze.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserStore _users;
+        private readonly ApplicationDbContext _db;
         private readonly JwtSettings _jwt;
 
-        public AuthController(UserStore users, IOptions<JwtSettings> jwt)
+        public AuthController(ApplicationDbContext db, IOptions<JwtSettings> jwt)
         {
-            _users = users;
+            _db = db;
             _jwt = jwt.Value;
         }
 
@@ -25,11 +26,13 @@ namespace SteelAnalyze.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginRequest request)
         {
-            var user = _users.Validate(request.Username, request.Password);
-            if (user == null) return Unauthorized(new { message = "Неверный логин или пароль" });
+            var user = _db.Users.FirstOrDefault(u => u.Username == request.Username);
+            if (user == null || !user.VerifyPassword(request.Password))
+                return Unauthorized(new { message = "Неверный логин или пароль" });
 
             var claims = new List<Claim>
             {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Username),
                 new(ClaimTypes.Role, user.Role)
             };
