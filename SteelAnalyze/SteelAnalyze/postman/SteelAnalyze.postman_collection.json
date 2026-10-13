@@ -1,4 +1,9 @@
 {
+  "info": {
+    "name": "SteelAnalyze API",
+    "description": "Запускать папки по порядку: 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6. Токены и Id сохраняются в переменные коллекции автоматически.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
   "variable": [
     {
       "key": "baseUrl",
@@ -13,145 +18,140 @@
       "value": ""
     },
     {
-      "key": "sessionId",
+      "key": "defectClassId",
       "value": "1"
     },
     {
-      "key": "categoryId",
-      "value": "1"
+      "key": "newClassId",
+      "value": "0"
     }
   ],
-  "info": {
-    "description": "Запускать папки по порядку: 0 -> 1 -> 2 -> 3 -> 4. Токены сохраняются в переменные коллекции автоматически.",
-    "name": "SteelAnalyze API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
   "item": [
     {
       "name": "0. Вход",
       "item": [
         {
+          "name": "Логин admin",
           "request": {
-            "body": {
-              "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}",
-              "mode": "raw"
-            },
             "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/auth/login",
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
             "auth": {
               "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}"
             }
           },
-          "name": "Логин admin",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
                   "pm.collectionVariables.set('adminToken', pm.response.json().token);"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Логин operator (роль User)",
           "request": {
-            "body": {
-              "raw": "{\"username\":\"operator\",\"password\":\"operator123\"}",
-              "mode": "raw"
-            },
             "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/auth/login",
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
             "auth": {
               "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"operator\",\"password\":\"operator123\"}"
             }
           },
-          "name": "Логин operator (роль User)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
                   "pm.collectionVariables.set('userToken', pm.response.json().token);"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Логин: неверный пароль (401)",
           "request": {
-            "body": {
-              "raw": "{\"username\":\"admin\",\"password\":\"wrong\"}",
-              "mode": "raw"
-            },
             "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/auth/login",
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
             "auth": {
               "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"wrong\"}"
             }
           },
-          "name": "Логин: неверный пароль (401)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 401', function () { pm.response.to.have.status(401); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         }
@@ -161,105 +161,137 @@
       "name": "1. 401 Unauthorized (нет токена)",
       "item": [
         {
+          "name": "Справочник классов без токена",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/analytics/high-confidence-defects",
+              "path": [
+                "api",
+                "defect-classes"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Журнал без токена",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отчёт без токена",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/defects-by-class",
+              "host": [
+                "{{baseUrl}}"
+              ],
               "path": [
                 "api",
                 "analytics",
-                "high-confidence-defects"
+                "defects-by-class"
               ]
             },
-            "header": [],
             "auth": {
               "type": "noauth"
             }
           },
-          "name": "Отчёт без токена",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 401', function () { pm.response.to.have.status(401); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "method": "GET",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions",
-              "path": [
-                "api",
-                "inspectionsessions"
-              ]
-            },
-            "header": [],
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "name": "Список сессий без токена",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 401', function () { pm.response.to.have.status(401); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "body": {
-              "raw": "{\"fileName\":\"batch_003.jpg\",\"defects\":[{\"categoryId\":1,\"imageUrl\":\"/img/9.jpg\",\"confidenceScore\":0.91}]}",
-              "mode": "raw"
-            },
-            "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions",
-              "path": [
-                "api",
-                "inspectionsessions"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+                ]
               }
-            ],
+            }
+          ]
+        },
+        {
+          "name": "Проверка снимка без токена",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
             "auth": {
               "type": "noauth"
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
             }
           },
-          "name": "Создание сессии без токена",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 401', function () { pm.response.to.have.status(401); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         }
@@ -269,19 +301,20 @@
       "name": "2. Чтение (User и Admin)",
       "item": [
         {
+          "name": "Справочник классов",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/inspectionsessions",
               "path": [
                 "api",
-                "inspectionsessions"
+                "defect-classes"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -293,34 +326,36 @@
               ]
             }
           },
-          "name": "Сессии",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('В справочнике есть классы', function () { pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty; });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.set('defectClassId', pm.response.json()[0].id); }"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Класс по Id",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{defectClassId}}",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/1",
               "path": [
                 "api",
-                "inspectionsessions",
-                "1"
+                "defect-classes",
+                "{{defectClassId}}"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -332,34 +367,34 @@
               ]
             }
           },
-          "name": "Сессия по Id",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Класс не найден (404)",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/999999",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/999",
               "path": [
                 "api",
-                "inspectionsessions",
-                "999"
+                "defect-classes",
+                "999999"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -371,33 +406,33 @@
               ]
             }
           },
-          "name": "Сессия не найдена",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Эталоны",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/references",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/categories",
               "path": [
                 "api",
-                "categories"
+                "references"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -409,34 +444,304 @@
               ]
             }
           },
-          "name": "Категории",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Эталоны одного класса",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/references?defectClassId={{defectClassId}}",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/analytics/high-confidence-defects",
+              "path": [
+                "api",
+                "references"
+              ],
+              "query": [
+                {
+                  "key": "defectClassId",
+                  "value": "{{defectClassId}}"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Эталон не найден (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Журнал",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Журнал с фильтрами",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections?from=2026-01-01&to=2026-12-31&defectClassId={{defectClassId}}&verdict=ManualReview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-31"
+                },
+                {
+                  "key": "defectClassId",
+                  "value": "{{defectClassId}}"
+                },
+                {
+                  "key": "verdict",
+                  "value": "ManualReview"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Журнал: неизвестный вердикт в фильтре (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections?verdict=Unknown",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ],
+              "query": [
+                {
+                  "key": "verdict",
+                  "value": "Unknown"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Запись журнала не найдена (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отчёт 1: дефекты по классам (Join + GroupBy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/defects-by-class?from=2026-01-01&to=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
               "path": [
                 "api",
                 "analytics",
-                "high-confidence-defects"
+                "defects-by-class"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-31"
+                }
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -448,34 +753,34 @@
               ]
             }
           },
-          "name": "Отчёт 1: надёжные дефекты (Join)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Отчёт 2: вердикты по дням (GroupBy)",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/analytics/verdicts-by-day",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/analytics/defects-summary-in-rejected",
               "path": [
                 "api",
                 "analytics",
-                "defects-summary-in-rejected"
+                "verdicts-by-day"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -487,55 +792,15 @@
               ]
             }
           },
-          "name": "Отчёт 2: сводка по забракованным (GroupBy)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "method": "GET",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/analytics/sessions-with-critical-defects",
-              "path": [
-                "api",
-                "analytics",
-                "sessions-with-critical-defects"
-              ]
-            },
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "name": "Отчёт 3: сессии с критическими дефектами",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         }
@@ -545,28 +810,25 @@
       "name": "3. 403 Forbidden (User пишет данные)",
       "item": [
         {
+          "name": "Создание класса (User)",
           "request": {
-            "body": {
-              "raw": "{\"fileName\":\"batch_003.jpg\",\"defects\":[{\"categoryId\":1,\"imageUrl\":\"/img/9.jpg\",\"confidenceScore\":0.91}]}",
-              "mode": "raw"
-            },
             "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions",
-              "path": [
-                "api",
-                "inspectionsessions"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes"
+              ]
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -576,45 +838,45 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          "name": "Создание сессии (User)",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
+            },
             "body": {
-              "raw": "{\"fileName\":\"batch_003_edited.jpg\",\"defects\":[]}",
-              "mode": "raw"
-            },
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":3}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменение класса (User)",
+          "request": {
             "method": "PUT",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/1",
-              "path": [
-                "api",
-                "inspectionsessions",
-                "1"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{defectClassId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes",
+                "{{defectClassId}}"
+              ]
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -624,36 +886,40 @@
                   "type": "string"
                 }
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":3}"
             }
           },
-          "name": "Изменение сессии (User)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Удаление класса (User)",
           "request": {
             "method": "DELETE",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{defectClassId}}",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/1",
               "path": [
                 "api",
-                "inspectionsessions",
-                "1"
+                "defect-classes",
+                "{{defectClassId}}"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -665,42 +931,135 @@
               ]
             }
           },
-          "name": "Удаление сессии (User)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Добавление эталона (User)",
           "request": {
-            "body": {
-              "raw": "{\"name\":\"Pit\",\"description\":\"Раковина\",\"severityLevel\":5}",
-              "mode": "raw"
-            },
             "method": "POST",
+            "header": [],
             "url": {
+              "raw": "{{baseUrl}}/api/references",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/categories",
               "path": [
                 "api",
-                "categories"
+                "references"
               ]
             },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "defectClassId",
+                  "value": "{{defectClassId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменение эталона (User)",
+          "request": {
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "1"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"defectClassId\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удаление эталона (User)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "1"
+              ]
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -712,47 +1071,170 @@
               ]
             }
           },
-          "name": "Создание категории (User)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Решение по ручной проверке (User)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/1/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "1",
+                "review"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"finalVerdict\":\"Rejected\",\"comment\":\"Проверено инженером\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удаление записи журнала (User)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "1"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отчёт 3: покрытие базы эталонов (User)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/reference-coverage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "reference-coverage"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
             }
           ]
         }
       ]
     },
     {
-      "name": "4. CRUD (Admin)",
+      "name": "4. Справочник классов: CRUD (Admin)",
       "item": [
         {
+          "name": "Создать класс",
           "request": {
-            "body": {
-              "raw": "{\"fileName\":\"batch_003.jpg\",\"defects\":[{\"categoryId\":1,\"imageUrl\":\"/img/9.jpg\",\"confidenceScore\":0.91}]}",
-              "mode": "raw"
-            },
             "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions",
-              "path": [
-                "api",
-                "inspectionsessions"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes"
+              ]
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -762,85 +1244,41 @@
                   "type": "string"
                 }
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":3}"
             }
           },
-          "name": "Создать сессию (admin)",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 201', function () { pm.response.to.have.status(201); });",
-                  "if (pm.response.code === 201) { pm.collectionVariables.set('sessionId', pm.response.json().id); }"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                  "if (pm.response.code === 201) { pm.collectionVariables.set('newClassId', pm.response.json().id); }"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Созданный класс по Id",
           "request": {
             "method": "GET",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/{{sessionId}}",
-              "path": [
-                "api",
-                "inspectionsessions",
-                "{{sessionId}}"
-              ]
-            },
             "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "name": "Сессия по Id",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "body": {
-              "raw": "{\"fileName\":\"batch_003_edited.jpg\",\"defects\":[]}",
-              "mode": "raw"
-            },
-            "method": "PUT",
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{newClassId}}",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/{{sessionId}}",
               "path": [
                 "api",
-                "inspectionsessions",
-                "{{sessionId}}"
+                "defect-classes",
+                "{{newClassId}}"
               ]
             },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -852,81 +1290,39 @@
               ]
             }
           },
-          "name": "Изменить сессию",
           "event": [
             {
+              "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Код класса сохранён', function () { pm.expect(pm.response.json().code).to.eql('postman_test'); });"
+                ]
+              }
             }
           ]
         },
         {
+          "name": "Создание: код уже занят (409)",
           "request": {
-            "body": {
-              "raw": "{\"fileName\":\"x.jpg\",\"defects\":[{\"categoryId\":99,\"imageUrl\":\"/i.jpg\",\"confidenceScore\":0.5}]}",
-              "mode": "raw"
-            },
             "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/inspectionsessions",
-              "path": [
-                "api",
-                "inspectionsessions"
-              ]
-            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "name": "Создание: несуществующая категория (400)",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "method": "DELETE",
             "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
               "host": [
                 "{{baseUrl}}"
               ],
-              "raw": "{{baseUrl}}/api/inspectionsessions/{{sessionId}}",
               "path": [
                 "api",
-                "inspectionsessions",
-                "{{sessionId}}"
+                "defect-classes"
               ]
             },
-            "header": [],
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -936,192 +1332,665 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          "name": "Удалить сессию",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
+            },
             "body": {
-              "raw": "{\"name\":\"Pit\",\"description\":\"Раковина\",\"severityLevel\":5}",
-              "mode": "raw"
-            },
-            "method": "POST",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/categories",
-              "path": [
-                "api",
-                "categories"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":3}"
             }
           },
-          "name": "Создать категорию (admin)",
           "event": [
             {
+              "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Статус 201', function () { pm.response.to.have.status(201); });",
-                  "if (pm.response.code === 201) { pm.collectionVariables.set('categoryId', pm.response.json().id); }"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "body": {
-              "raw": "{\"name\":\"Pit\",\"description\":\"Раковина (изм.)\",\"severityLevel\":6}",
-              "mode": "raw"
-            },
-            "method": "PUT",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
-              "path": [
-                "api",
-                "categories",
-                "{{categoryId}}"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "name": "Изменить категорию",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
-              "path": [
-                "api",
-                "categories",
-                "{{categoryId}}"
-              ]
-            },
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "name": "Удалить категорию",
-          "event": [
-            {
-              "script": {
-                "exec": [
-                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
-            }
-          ]
-        },
-        {
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "raw": "{{baseUrl}}/api/categories/1",
-              "path": [
-                "api",
-                "categories",
-                "1"
-              ]
-            },
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "name": "Удалить используемую категорию (409)",
-          "event": [
-            {
-              "script": {
+                "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 409', function () { pm.response.to.have.status(409); });"
-                ],
-                "type": "text/javascript"
-              },
-              "listen": "test"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создание: недопустимый код (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"Bad Code\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":3}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создание: опасность вне 1–10 (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test_2\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":11}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменить класс",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{newClassId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes",
+                "{{newClassId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman (изм.)\",\"severityLevel\":4}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменение: класс не найден (404)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"postman_test\",\"name\":\"Тестовый класс\",\"description\":\"Создан коллекцией Postman\",\"severityLevel\":3}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить класс",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{newClassId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes",
+                "{{newClassId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалённый класс не найден (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{newClassId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes",
+                "{{newClassId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Эталоны, журнал и отчёт (Admin)",
+      "item": [
+        {
+          "name": "Отчёт 3: покрытие базы эталонов",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/reference-coverage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "reference-coverage"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('В отчёте есть все классы справочника', function () { pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменение эталона: не найден (404)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"defectClassId\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удаление эталона: не найден (404)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Решение по ручной проверке: запись не найдена (404)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/999999/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "999999",
+                "review"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"finalVerdict\":\"Rejected\",\"comment\":\"Проверено инженером\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Решение: неизвестный вердикт (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/999999/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "999999",
+                "review"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"finalVerdict\":\"Unknown\",\"comment\":\"Проверено инженером\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удаление записи журнала: не найдена (404)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Снимки: нейросеть ещё не подключена (503)",
+      "description": "Пока модель распознавания не подключена, загрузка снимков отвечает 503. После подключения сети в поле image нужно выбрать файл снимка, а ожидаемый статус станет 201.",
+      "item": [
+        {
+          "name": "Добавить эталон (admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "defectClassId",
+                  "value": "{{defectClassId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 503', function () { pm.response.to.have.status(503); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Проверить снимок (operator)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 503', function () { pm.response.to.have.status(503); });"
+                ]
+              }
             }
           ]
         }

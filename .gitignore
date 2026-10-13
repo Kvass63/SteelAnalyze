@@ -15,3 +15,15 @@ storage/
 
 # Рабочие документы (постановка задачи, модель данных)
 docs/
+
+# Обучение сети: скачанные архивы, исходные наборы снимков и собранный датасет
+training/_downloads/
+training/raw_datasets/
+training/dataset/
+# Библиотеки Python и промежуточные файлы обучения (итоговые model.onnx и metrics.json в git попадают)
+training/.venv/
+training/output/
+__pycache__/
+# Список библиотек нужен в репозитории, хотя остальные .txt игнорируются
+!training/requirements.txt
+training/README.md
