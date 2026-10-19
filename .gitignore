@@ -26,4 +26,3 @@ training/output/
 __pycache__/
 # Список библиотек нужен в репозитории, хотя остальные .txt игнорируются
 !training/requirements.txt
-training/README.md
