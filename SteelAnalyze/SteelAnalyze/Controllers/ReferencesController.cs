@@ -86,6 +86,7 @@ namespace SteelAnalyze.Controllers
             {
                 DefectClassId = defectClassId,
                 Embedding = EmbeddingCodec.ToBytes(embedding),
+                ModelVersion = _extractor.ModelVersion!,
                 AddedByUserId = User.GetUserId(),
                 ImagePath = _storage.Save(ImageStorage.ReferencesFolder, image!.FileName, content)
             };

@@ -37,7 +37,7 @@ namespace SteelAnalyze.Controllers
 
             var error = ImageStorage.Validate(image);
             if (error != null) return BadRequest(new { message = error });
-            if (!_db.ReferenceSamples.Any())
+            if (!_db.ReferenceSamples.Any(r => r.ModelVersion == _extractor.ModelVersion))
                 return Conflict(new { message = "База эталонов пуста: распознавать не с чем" });
 
             Inspection inspection;

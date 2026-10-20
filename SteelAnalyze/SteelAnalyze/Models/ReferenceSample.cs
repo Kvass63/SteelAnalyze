@@ -12,6 +12,7 @@ namespace SteelAnalyze.Models
 
         public string ImagePath { get; set; } = string.Empty; // Путь к файлу внутри хранилища снимков
         public byte[] Embedding { get; set; } = []; // Вектор признаков, сохранённый как набор байтов
+        public string ModelVersion { get; set; } = string.Empty; // Какой моделью посчитан эмбеддинг
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 
         public int AddedByUserId { get; set; }
