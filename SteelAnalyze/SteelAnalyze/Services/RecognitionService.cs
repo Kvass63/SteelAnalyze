@@ -22,8 +22,10 @@ namespace SteelAnalyze.Services
         {
             var embedding = _extractor.Extract(image);
 
+            // Только эталоны, посчитанные текущей моделью
             var references = _db.ReferenceSamples
                 .AsNoTracking()
+                .Where(r => r.ModelVersion == _extractor.ModelVersion)
                 .Select(r => new { r.Id, r.DefectClassId, r.Embedding })
                 .AsEnumerable()
                 .Select(r => new ReferenceVector(r.Id, r.DefectClassId, EmbeddingCodec.FromBytes(r.Embedding)))

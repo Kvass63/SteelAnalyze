@@ -38,18 +38,29 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddSingleton<ImageStorage>();
-// Заменяется реализацией на нейросети после обучения модели
-builder.Services.AddSingleton<IEmbeddingExtractor, UnavailableEmbeddingExtractor>();
+// Нейросеть: файл модели лежит рядом с программой; без него сервер работает, но распознавание отвечает 503
+var modelPath = Path.Combine(AppContext.BaseDirectory, builder.Configuration["Model:Path"] ?? "model.onnx");
+if (File.Exists(modelPath))
+    builder.Services.AddSingleton<IEmbeddingExtractor>(new OnnxEmbeddingExtractor(modelPath));
+else
+    builder.Services.AddSingleton<IEmbeddingExtractor, UnavailableEmbeddingExtractor>();
 builder.Services.AddScoped<RecognitionService>();
 
 var app = builder.Build();
 
-// Создание и обновление базы по миграциям, начальное заполнение
+// Создание и обновление базы по миграциям, начальное заполнение, пересчёт эталонов после замены модели
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
     DbSeeder.Seed(db);
+
+    var extractor = app.Services.GetRequiredService<IEmbeddingExtractor>();
+    if (extractor.IsAvailable)
+        app.Logger.LogInformation("Модель распознавания загружена: {Path} (версия {Version})", modelPath, extractor.ModelVersion);
+    else
+        app.Logger.LogWarning("Файл модели {Path} не найден: распознавание недоступно", modelPath);
+    ReferenceEmbeddingUpdater.Update(db, extractor, app.Services.GetRequiredService<ImageStorage>(), app.Logger);
 }
 
 if (app.Environment.IsDevelopment())
