@@ -45,6 +45,7 @@ if (File.Exists(modelPath))
 else
     builder.Services.AddSingleton<IEmbeddingExtractor, UnavailableEmbeddingExtractor>();
 builder.Services.AddScoped<RecognitionService>();
+builder.Services.AddScoped<ReferenceImporter>();
 
 var app = builder.Build();
 

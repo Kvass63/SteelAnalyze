@@ -17,12 +17,17 @@ namespace SteelAnalyze.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IEmbeddingExtractor _extractor;
         private readonly ImageStorage _storage;
+        private readonly ReferenceImporter _importer;
+        private readonly IWebHostEnvironment _environment;
 
-        public ReferencesController(ApplicationDbContext db, IEmbeddingExtractor extractor, ImageStorage storage)
+        public ReferencesController(ApplicationDbContext db, IEmbeddingExtractor extractor, ImageStorage storage,
+            ReferenceImporter importer, IWebHostEnvironment environment)
         {
             _db = db;
             _extractor = extractor;
             _storage = storage;
+            _importer = importer;
+            _environment = environment;
         }
 
         // READ: Список эталонов, при необходимости только одного класса
@@ -72,6 +77,10 @@ namespace SteelAnalyze.Controllers
                 return BadRequest(new { message = $"Класс с Id={defectClassId} не существует" });
 
             var content = ImageStorage.ReadAllBytes(image!);
+            var hash = ImageStorage.GetContentHash(content);
+            if (_db.ReferenceSamples.Any(r => r.ContentHash == hash))
+                return Conflict(new { message = "Этот снимок уже есть среди эталонов" });
+
             float[] embedding;
             try
             {
@@ -85,6 +94,8 @@ namespace SteelAnalyze.Controllers
             var reference = new ReferenceSample
             {
                 DefectClassId = defectClassId,
+                OriginalFileName = image!.FileName,
+                ContentHash = hash,
                 Embedding = EmbeddingCodec.ToBytes(embedding),
                 ModelVersion = _extractor.ModelVersion!,
                 AddedByUserId = User.GetUserId(),
@@ -95,6 +106,22 @@ namespace SteelAnalyze.Controllers
 
             var created = WithDetails().First(r => r.Id == reference.Id);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, ReferenceDto.From(created));
+        }
+
+        // CREATE: Загрузить партию эталонов из папки на сервере; класс снимка — имя его подпапки (только администратор)
+        [HttpPost("import")]
+        [Authorize(Roles = Roles.Admin)]
+        public ActionResult<ReferenceImportResult> Import(ReferenceImportInput input)
+        {
+            if (!_extractor.IsAvailable)
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "Модель распознавания не загружена" });
+
+            // Относительный путь отсчитывается от папки проекта
+            var folder = Path.GetFullPath(input.Folder, _environment.ContentRootPath);
+            if (!Directory.Exists(folder))
+                return BadRequest(new { message = $"Папка '{folder}' не найдена" });
+
+            return Ok(_importer.Import(folder, User.GetUserId()));
         }
 
         // UPDATE: Исправить класс эталона (только администратор)
