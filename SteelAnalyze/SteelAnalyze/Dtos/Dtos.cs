@@ -25,6 +25,12 @@ namespace SteelAnalyze.Dtos
         public int DefectClassId { get; set; }
     }
 
+    public class ReferenceImportInput
+    {
+        // Папка на сервере с подпапками по кодам классов: <Folder>/crack/*.jpg, <Folder>/hole/*.jpg, ...
+        [Required] public string Folder { get; set; } = string.Empty;
+    }
+
     public class ReviewInput
     {
         public Verdict FinalVerdict { get; set; }
@@ -38,6 +44,7 @@ namespace SteelAnalyze.Dtos
         int DefectClassId,
         string DefectClassCode,
         string DefectClassName,
+        string OriginalFileName,
         DateTime AddedAt,
         string AddedBy)
     {
@@ -46,9 +53,16 @@ namespace SteelAnalyze.Dtos
             r.DefectClassId,
             r.DefectClass!.Code,
             r.DefectClass.Name,
+            r.OriginalFileName,
             r.AddedAt,
             r.AddedBy!.Username);
     }
+
+    public record ReferenceImportResult(
+        int Added,                  // Добавлено эталонов
+        int Duplicates,             // Пропущено: такой снимок уже есть среди эталонов
+        List<string> UnknownClasses, // Подпапки, для которых нет класса с таким кодом
+        List<string> FailedFiles);  // Файлы, которые не удалось принять как снимок
 
     public record NeighborDto(
         int Rank,

@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace SteelAnalyze.Services
 {
     // Хранение снимков файлами на диске; в базе лежит только путь внутри хранилища
@@ -24,13 +26,19 @@ namespace SteelAnalyze.Services
         }
 
         // Возвращает текст ошибки или null, если файл можно принять
-        public static string? Validate(IFormFile? file)
+        public static string? Validate(IFormFile? file) =>
+            file == null ? "Файл снимка не передан" : Validate(file.FileName, file.Length);
+
+        public static string? Validate(string fileName, long length)
         {
-            if (file == null || file.Length == 0) return "Файл снимка не передан";
-            if (file.Length > MaxFileSize) return "Файл снимка больше 10 МБ";
-            if (!ContentTypes.ContainsKey(Path.GetExtension(file.FileName))) return "Допустимые форматы снимка: JPG, PNG, BMP";
+            if (length == 0) return "Файл снимка не передан";
+            if (length > MaxFileSize) return "Файл снимка больше 10 МБ";
+            if (!ContentTypes.ContainsKey(Path.GetExtension(fileName))) return "Допустимые форматы снимка: JPG, PNG, BMP";
             return null;
         }
+
+        public static string GetContentHash(byte[] content) =>
+            Convert.ToHexString(SHA256.HashData(content)).ToLowerInvariant();
 
         public static byte[] ReadAllBytes(IFormFile file)
         {

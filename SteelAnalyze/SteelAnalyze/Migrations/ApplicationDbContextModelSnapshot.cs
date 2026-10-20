@@ -173,6 +173,10 @@ namespace SteelAnalyze.Migrations
                     b.Property<int>("AddedByUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("DefectClassId")
                         .HasColumnType("INTEGER");
 
@@ -188,9 +192,15 @@ namespace SteelAnalyze.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AddedByUserId");
+
+                    b.HasIndex("ContentHash");
 
                     b.HasIndex("DefectClassId");
 
