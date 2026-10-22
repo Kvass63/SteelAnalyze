@@ -24,6 +24,26 @@
     {
       "key": "newClassId",
       "value": "0"
+    },
+    {
+      "key": "datasetDir",
+      "value": "D:/BalpeisovLabs/SteelAnalyze/training/dataset/images"
+    },
+    {
+      "key": "scratchClassId",
+      "value": "0"
+    },
+    {
+      "key": "referenceId",
+      "value": "0"
+    },
+    {
+      "key": "inspectionId",
+      "value": "0"
+    },
+    {
+      "key": "reviewInspectionId",
+      "value": "0"
     }
   ],
   "item": [
@@ -997,6 +1017,54 @@
           ]
         },
         {
+          "name": "Импорт эталонов (User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "import"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"folder\":\"{{datasetDir}}/train\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Изменение эталона (User)",
           "request": {
             "method": "PUT",
@@ -1890,9 +1958,257 @@
       ]
     },
     {
-      "name": "6. Снимки: нейросеть ещё не подключена (503)",
-      "description": "Пока модель распознавания не подключена, загрузка снимков отвечает 503. После подключения сети в поле image нужно выбрать файл снимка, а ожидаемый статус станет 201.",
+      "name": "6. Импорт эталонов (Admin)",
+      "description": "Загрузка train и val как базы эталонов. Первый запуск идёт около 2 минут, повторные — секунды: уже загруженные снимки пропускаются.",
       "item": [
+        {
+          "name": "Импорт train",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "import"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"folder\":\"{{datasetDir}}/train\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Все подпапки — коды классов', function () { pm.expect(r.unknownClasses).to.be.empty; });",
+                  "pm.test('Все файлы приняты как снимки', function () { pm.expect(r.failedFiles).to.be.empty; });",
+                  "pm.test('Снимки добавлены или уже были в базе', function () { pm.expect(r.added + r.duplicates).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Импорт val",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "import"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"folder\":\"{{datasetDir}}/val\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Все подпапки — коды классов', function () { pm.expect(r.unknownClasses).to.be.empty; });",
+                  "pm.test('Все файлы приняты как снимки', function () { pm.expect(r.failedFiles).to.be.empty; });",
+                  "pm.test('Снимки добавлены или уже были в базе', function () { pm.expect(r.added + r.duplicates).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Повторный импорт val: только повторы",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "import"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"folder\":\"{{datasetDir}}/val\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Ничего не добавлено', function () { pm.expect(pm.response.json().added).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Импорт: папка не найдена (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "import"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"folder\":\"{{datasetDir}}/no_such_folder\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Снимки: эталон, проверка, ручная проверка",
+      "description": "Файлы снимков лежат в postman/samples. В Postman папка postman должна быть рабочей папкой (Settings → General → Working directory).",
+      "item": [
+        {
+          "name": "Найти класс scratch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "const scratch = pm.response.json().find(c => c.code === 'scratch');",
+                  "pm.test('Класс scratch есть в справочнике', function () { pm.expect(scratch).to.exist; });",
+                  "pm.collectionVariables.set('scratchClassId', scratch.id);"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Добавить эталон (admin)",
           "request": {
@@ -1924,11 +2240,11 @@
                 {
                   "key": "image",
                   "type": "file",
-                  "src": []
+                  "src": "samples/scratch_reference.jpg"
                 },
                 {
                   "key": "defectClassId",
-                  "value": "{{defectClassId}}",
+                  "value": "{{scratchClassId}}",
                   "type": "text"
                 }
               ]
@@ -1940,7 +2256,64 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Статус 503', function () { pm.response.to.have.status(503); });"
+                  "pm.test('Статус 201', function () { pm.response.to.have.status(201); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Эталон записан в класс scratch', function () { pm.expect(r.defectClassCode).to.eql('scratch'); });",
+                  "pm.test('Сохранено исходное имя файла', function () { pm.expect(r.originalFileName).to.eql('scratch_reference.jpg'); });",
+                  "pm.collectionVariables.set('referenceId', r.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Тот же снимок повторно (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "samples/scratch_reference.jpg"
+                },
+                {
+                  "key": "defectClassId",
+                  "value": "{{scratchClassId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 409', function () { pm.response.to.have.status(409); });"
                 ]
               }
             }
@@ -1977,7 +2350,7 @@
                 {
                   "key": "image",
                   "type": "file",
-                  "src": []
+                  "src": "samples/scratch_reference.jpg"
                 }
               ]
             }
@@ -1988,7 +2361,493 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Статус 503', function () { pm.response.to.have.status(503); });"
+                  "pm.test('Статус 201', function () { pm.response.to.have.status(201); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Определена царапина', function () { pm.expect(r.predictedClassCode).to.eql('scratch'); });",
+                  "pm.test('Найдено 5 ближайших эталонов', function () { pm.expect(r.neighbors).to.have.lengthOf(5); });",
+                  "pm.test('Самый похожий — только что добавленный эталон, сходство ~1', function () {",
+                  "    pm.expect(r.neighbors[0].referenceSampleId).to.eql(Number(pm.collectionVariables.get('referenceId')));",
+                  "    pm.expect(r.neighbors[0].similarity).to.be.above(0.999);",
+                  "});",
+                  "pm.collectionVariables.set('inspectionId', r.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Проверить не снимок (400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "samples/not_an_image.jpg"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Проверить снимок для ручной проверки (operator)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "samples/inclusion_manual_review.jpg"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 201', function () { pm.response.to.have.status(201); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Снимок отправлен на ручную проверку', function () { pm.expect(r.verdict).to.eql('ManualReview'); });",
+                  "pm.collectionVariables.set('reviewInspectionId', r.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Решение инженера (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/{{reviewInspectionId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "{{reviewInspectionId}}",
+                "review"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"finalVerdict\":\"Rejected\",\"comment\":\"Подтверждено инженером по качеству\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Запись с решением инженера",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/{{reviewInspectionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "{{reviewInspectionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Решение и инженер сохранены', function () {",
+                  "    pm.expect(r.finalVerdict).to.eql('Rejected');",
+                  "    pm.expect(r.reviewedBy).to.eql('admin');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Решение по записи не на ручной проверке (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/{{inspectionId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "{{inspectionId}}",
+                "review"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"finalVerdict\":\"Rejected\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить используемый класс (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/defect-classes/{{scratchClassId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "defect-classes",
+                "{{scratchClassId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить эталон (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/{{referenceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "{{referenceId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалённый эталон не найден (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/{{referenceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "{{referenceId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Запись журнала после удаления эталона",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/{{inspectionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "{{inspectionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Ссылка на удалённый эталон очищена, запись осталась', function () {",
+                  "    pm.expect(pm.response.json().neighbors[0].referenceSampleId).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить запись журнала",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/{{inspectionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "{{inspectionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить запись журнала с решением",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections/{{reviewInspectionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections",
+                "{{reviewInspectionId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 204', function () { pm.response.to.have.status(204); });"
                 ]
               }
             }

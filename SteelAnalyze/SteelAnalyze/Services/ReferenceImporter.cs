@@ -9,6 +9,9 @@ namespace SteelAnalyze.Services
     {
         private const int SaveBatchSize = 100;
 
+        // Одновременно идёт только один импорт: иначе второй не видит ещё не сохранённые снимки первого и добавляет их повторно
+        private static readonly SemaphoreSlim ImportLock = new(1, 1);
+
         private readonly ApplicationDbContext _db;
         private readonly IEmbeddingExtractor _extractor;
         private readonly ImageStorage _storage;
@@ -22,7 +25,21 @@ namespace SteelAnalyze.Services
             _logger = logger;
         }
 
-        public ReferenceImportResult Import(string folder, int adminId)
+        // null — другой импорт ещё не закончился
+        public ReferenceImportResult? TryImport(string folder, int adminId)
+        {
+            if (!ImportLock.Wait(0)) return null;
+            try
+            {
+                return Import(folder, adminId);
+            }
+            finally
+            {
+                ImportLock.Release();
+            }
+        }
+
+        private ReferenceImportResult Import(string folder, int adminId)
         {
             var classes = _db.DefectClasses.ToDictionary(c => c.Code, StringComparer.OrdinalIgnoreCase);
             var knownHashes = _db.ReferenceSamples.Select(r => r.ContentHash).ToHashSet();
