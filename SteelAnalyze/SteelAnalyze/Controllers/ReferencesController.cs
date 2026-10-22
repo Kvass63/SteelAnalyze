@@ -121,7 +121,10 @@ namespace SteelAnalyze.Controllers
             if (!Directory.Exists(folder))
                 return BadRequest(new { message = $"Папка '{folder}' не найдена" });
 
-            return Ok(_importer.Import(folder, User.GetUserId()));
+            var result = _importer.TryImport(folder, User.GetUserId());
+            return result == null
+                ? Conflict(new { message = "Импорт эталонов уже выполняется, дождитесь его окончания" })
+                : Ok(result);
         }
 
         // UPDATE: Исправить класс эталона (только администратор)
