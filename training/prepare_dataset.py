@@ -1,10 +1,7 @@
 """Шаг 2. Собирает из трёх исходных наборов (raw_datasets/) единый датасет из 10 классов (dataset/).
 
-Перенос модуля prepare_dataset.py из приложения А ВКР. Отличия от оригинала:
-- имена исходных папок приведены к тем, что реально лежат в скачанных архивах;
-- вместо pandas и tqdm используется стандартная библиотека, ставить ничего не нужно.
-
 Запуск:  python prepare_dataset.py
+Нужен только Python, дополнительных библиотек не требуется.
 """
 import csv
 import random
@@ -25,7 +22,7 @@ IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
 # Доли выборок: обучающая, проверочная, тестовая
 SPLITS = {"train": 0.7, "val": 0.15, "test": 0.15}
 
-# Схема сопоставления классов (таблица 7 ВКР): набор -> исходная папка -> единый класс
+# Схема сопоставления классов: набор -> исходная папка -> единый класс
 CLASS_MAPPING = {
     "GC10": {
         "crease": "crack",
@@ -37,8 +34,7 @@ CLASS_MAPPING = {
         "silk_spot": "stain",
         "water_spot": "stain",
         "welding_line": "weld_line",
-        # Папка "waist folding" (поясная складка) не используется. В коде ВКР она записана
-        # с опечаткой ("waits folding"), поэтому скрипт её пропускал — так и получилось 10 классов, а не 11
+        # Папка "waist folding" (поясная складка) в датасет не входит
     },
     "NEU": {
         "crazing": "crack",
@@ -48,7 +44,6 @@ CLASS_MAPPING = {
         "rolled-in_scale": "oxide_scale",
         "scratches": "scratch",
     },
-    # В тексте ВКР этот набор назван X-DDD; настоящее название — X-SDD
     "X-SDD": {
         "finishing roll printing": "roll_mark",
         "iron sheet ash": "stain",
@@ -58,22 +53,6 @@ CLASS_MAPPING = {
         "slag inclusion": "inclusion",
         "surface scratch": "scratch",
     },
-}
-
-
-# Сколько снимков каждого класса было в датасете ВКР (всего 5225).
-# Числа получены из рисунка 29 ВКР: сумма строки матрицы ошибок — это число снимков класса.
-VKR_CLASS_COUNTS = {
-    "crack": 329,
-    "crescent_gap": 226,
-    "hole": 218,
-    "inclusion": 685,
-    "oxide_scale": 566,
-    "pitted_surface": 330,
-    "roll_mark": 203,
-    "scratch": 434,
-    "stain": 1961,
-    "weld_line": 273,
 }
 
 
@@ -164,12 +143,10 @@ def save_tables(metadata: list[dict]) -> None:
     by_source = Counter(m["source"] for m in metadata)
     write_csv("source_statistics.csv", ["source", "count"], [[s, by_source[s]] for s in sorted(by_source)])
 
-    print("\nКласс             train   val  test  всего  в ВКР")
+    print("\nКласс             train   val  test  всего")
     for cls, train, val, test, total in rows:
-        expected = VKR_CLASS_COUNTS.get(cls, 0)
-        note = "совпадает" if total == expected else f"расхождение {total - expected:+d}"
-        print(f"{cls:16s} {train:6d} {val:5d} {test:5d} {total:6d} {expected:6d}  {note}")
-    print(f"{'всего':16s} {'':18s} {len(metadata):6d} {sum(VKR_CLASS_COUNTS.values()):6d}")
+        print(f"{cls:16s} {train:6d} {val:5d} {test:5d} {total:6d}")
+    print(f"{'всего':16s} {'':18s} {len(metadata):6d}")
     print("\nИсточник:")
     for source in sorted(by_source):
         print(f"  {source:6s} {by_source[source]}")

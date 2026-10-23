@@ -200,6 +200,5 @@
       ]
     ]
   },
-  "test_recall_at_1_gallery_300": 0.7735148668289185,
-  "vkr_recall_at_1": 0.8672
+  "test_recall_at_1_gallery_300": 0.7735148668289185
 }

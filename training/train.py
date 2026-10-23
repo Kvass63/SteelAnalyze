@@ -1,7 +1,6 @@
 """Шаг 3. Обучает сеть и сохраняет её в файл model.onnx.
 
-Перенос скрипта обучения из приложения А ВКР: EfficientNet-B0, триплетная функция потерь,
-подбор трудных отрицательных примеров. Настройки обучения — те же, что в коде ВКР.
+EfficientNet-B0, триплетная функция потерь, подбор трудных отрицательных примеров.
 
 Запуск:
     python train.py --smoke    быстрая проверка, что всё установлено и видеокарта работает
@@ -23,7 +22,7 @@ import torch.nn.functional as F
 from export_onnx import export_onnx
 from model import IMG_SIZE, EfficientNetEmbedding
 
-# Настройки обучения из кода ВКР
+# Настройки обучения
 MARGIN = 0.5                 # на сколько «чужой» снимок должен быть дальше «своего»
 BATCH_SIZE = 32              # троек снимков в одном шаге обучения
 EPOCHS = 30
@@ -37,13 +36,9 @@ DATASET_DIR = ROOT / "dataset" / "images"
 OUTPUT_DIR = ROOT / "output"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
 
-# Результат из ВКР, с которым сравнивается обученная модель (таблица 10)
-VKR_RECALL_AT_1 = 0.8672
-VKR_GALLERY_SIZE = 300       # в коде ВКР качество мерилось по галерее из 300 снимков
-
 
 def load_split(split: str, classes: list[str], limit: int | None) -> tuple[torch.Tensor, torch.Tensor]:
-    """Читает снимки выборки. Предобработка как в ВКР: RGB, сжатие до 224x224."""
+    """Читает снимки выборки. Предобработка: RGB, сжатие до 224x224."""
     images, labels = [], []
     for class_index, class_name in enumerate(classes):
         paths = sorted(p for p in (DATASET_DIR / split / class_name).iterdir() if p.suffix.lower() in IMAGE_EXTENSIONS)
@@ -243,20 +238,15 @@ def main() -> None:
     train_embeddings = embed(model, train_images, device)
     test_embeddings = embed(model, test_images, device)
 
-    # Галерея — обучающая и проверочная выборки вместе, как база эталонов в ПО из ВКР
+    # Галерея — обучающая и проверочная выборки вместе, как база эталонов в Web API
     gallery_embeddings = torch.cat([train_embeddings, embed(model, val_images, device)])
     gallery_labels = torch.cat([train_labels, val_labels])
     final = evaluate(test_embeddings, test_labels, gallery_embeddings, gallery_labels, classes)
-
-    # Для сравнения с ВКР: там галереей служили 300 снимков обучающей выборки
-    subset = torch.randperm(len(train_labels), generator=torch.Generator().manual_seed(SEED))[:VKR_GALLERY_SIZE]
-    small_gallery = evaluate(test_embeddings, test_labels, train_embeddings[subset], train_labels[subset], classes)
 
     print(f"Recall@1:  {final['recall_at_1']:.4f}")
     print(f"Recall@5:  {final['recall_at_5']:.4f}")
     print(f"Recall@10: {final['recall_at_10']:.4f}")
     print(f"Точность голосования 5 ближайших (как в Web API): {final['vote_accuracy']:.4f}")
-    print(f"Recall@1 при галерее из {VKR_GALLERY_SIZE} снимков: {small_gallery['recall_at_1']:.4f} (в ВКР: {VKR_RECALL_AT_1})")
     print("\nТочность по классам:")
     for name, value in final["per_class_accuracy"].items():
         print(f"  {name:16s} {value:.4f}")
@@ -276,8 +266,6 @@ def main() -> None:
             "images": {"train": len(train_images), "val": len(val_images), "test": len(test_images)},
             "history": history,
             "test": final,
-            "test_recall_at_1_gallery_300": small_gallery["recall_at_1"],
-            "vkr_recall_at_1": VKR_RECALL_AT_1,
         }, file, ensure_ascii=False, indent=2)
 
     print(f"\nГотово. Модель: {onnx_path}, показатели: {metrics_path}")

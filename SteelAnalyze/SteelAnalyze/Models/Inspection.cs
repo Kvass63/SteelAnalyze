@@ -9,6 +9,7 @@ namespace SteelAnalyze.Models
         ManualReview        // На ручную проверку
     }
 
+    // Зона уверенности системы в определённом классе
     public enum SimilarityZone
     {
         Green,  // Система уверена
@@ -19,9 +20,11 @@ namespace SteelAnalyze.Models
     // Запись журнала распознавания: один снимок и результат по нему
     public class Inspection
     {
-        // Пороги зон сходства (взяты из ВКР)
-        public const double GreenZoneThreshold = 0.80;
-        public const double YellowZoneThreshold = 0.60;
+        // Ниже этого сходства снимок не похож ни на один эталон — скорее всего, это вообще не снимок дефекта стали
+        public const double AnomalySimilarityThreshold = 0.90;
+        // Сколько из 5 ближайших эталонов должны быть того же класса
+        public const int GreenZoneVotes = 5;
+        public const int YellowZoneVotes = 3;
 
         public int Id { get; set; }
         public string ImagePath { get; set; } = string.Empty; // Путь к файлу внутри хранилища снимков
@@ -35,6 +38,7 @@ namespace SteelAnalyze.Models
         public DefectClass? PredictedClass { get; set; }
 
         public double Similarity { get; set; } // Сходство с ближайшим эталоном от 0.0 до 1.0
+        public int NeighborVotes { get; set; } // Сколько ближайших эталонов того же класса, что определён
         public bool SecondDefectSuspected { get; set; } // Среди ближайших эталонов есть другой критический класс
         public Verdict Verdict { get; set; } // Вердикт системы
 
@@ -46,12 +50,12 @@ namespace SteelAnalyze.Models
 
         public List<InspectionNeighbor> Neighbors { get; set; } = new();
 
-        // Бизнес-логика: Определение зоны сходства
+        // Бизнес-логика: Определение зоны по сходству и согласию ближайших эталонов
         public SimilarityZone GetZone()
         {
-            if (Similarity >= GreenZoneThreshold) return SimilarityZone.Green;
-            if (Similarity >= YellowZoneThreshold) return SimilarityZone.Yellow;
-            return SimilarityZone.Red;
+            if (Similarity < AnomalySimilarityThreshold || NeighborVotes < YellowZoneVotes) return SimilarityZone.Red;
+            if (NeighborVotes >= GreenZoneVotes) return SimilarityZone.Green;
+            return SimilarityZone.Yellow;
         }
 
         // Бизнес-логика: Автоматическое вынесение вердикта по зоне сходства и опасности класса

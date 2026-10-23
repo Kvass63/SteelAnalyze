@@ -6,7 +6,7 @@ namespace SteelAnalyze.Services
 
     public record ClassificationResult(int PredictedClassId, double Similarity, IReadOnlyList<NeighborMatch> Neighbors);
 
-    // Определение класса дефекта по ближайшим эталонам (алгоритм из ВКР)
+    // Определение класса дефекта по ближайшим эталонам
     public static class DefectClassifier
     {
         public const int NeighborCount = 5;

@@ -6,7 +6,7 @@ using OpenCvSharp;
 
 namespace SteelAnalyze.Services
 {
-    // Нейросеть из ВКР (EfficientNet-B0 + надстройка), обученная в training/ и сохранённая в формате ONNX
+    // Нейросеть (EfficientNet-B0 + надстройка), обученная в training/ и сохранённая в формате ONNX
     public class OnnxEmbeddingExtractor : IEmbeddingExtractor, IDisposable
     {
         private const int ImageSize = 224;
@@ -33,9 +33,9 @@ namespace SteelAnalyze.Services
             return results.First(r => r.Name == OutputName).AsEnumerable<float>().ToArray();
         }
 
-        // Подготовка снимка точно как при обучении (train.py) и в ВКР:
+        // Подготовка снимка точно как при обучении сети:
         // цветной снимок -> RGB -> 224x224 без сохранения пропорций (билинейно) -> значения 0..1, порядок осей канал-высота-ширина.
-        // Используется та же библиотека OpenCV, что и в Python: другие библиотеки сжимают снимок иначе, и эмбеддинги расходятся
+        // Используется та же библиотека OpenCV, что и при обучении: другие библиотеки сжимают снимок иначе, и эмбеддинги расходятся
         private static DenseTensor<float> ToTensor(byte[] image)
         {
             using var decoded = DecodeImage(image);

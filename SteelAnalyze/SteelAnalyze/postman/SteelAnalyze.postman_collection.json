@@ -2369,6 +2369,10 @@
                   "    pm.expect(r.neighbors[0].referenceSampleId).to.eql(Number(pm.collectionVariables.get('referenceId')));",
                   "    pm.expect(r.neighbors[0].similarity).to.be.above(0.999);",
                   "});",
+                  "pm.test('Все 5 соседей — царапины, зона зелёная', function () {",
+                  "    pm.expect(r.neighborVotes).to.eql(5);",
+                  "    pm.expect(r.zone).to.eql('Green');",
+                  "});",
                   "pm.collectionVariables.set('inspectionId', r.id);"
                 ]
               }
@@ -2467,6 +2471,10 @@
                 "exec": [
                   "pm.test('Статус 201', function () { pm.response.to.have.status(201); });",
                   "const r = pm.response.json();",
+                  "pm.test('Соседи разделились (3 из 5), зона жёлтая', function () {",
+                  "    pm.expect(r.neighborVotes).to.eql(3);",
+                  "    pm.expect(r.zone).to.eql('Yellow');",
+                  "});",
                   "pm.test('Снимок отправлен на ручную проверку', function () { pm.expect(r.verdict).to.eql('ManualReview'); });",
                   "pm.collectionVariables.set('reviewInspectionId', r.id);"
                 ]

@@ -20,7 +20,7 @@ IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
 SOURCES = {
     # NEU-DET, Северо-Восточный университет (Китай): 6 классов по 300 снимков
     "NEU": "https://www.kaggle.com/api/v1/datasets/download/kaustubhdikshit/neu-surface-defect-database",
-    # GC10-DET: 10 классов, папки названы так же, как в коде ВКР (архив около 920 МБ)
+    # GC10-DET: 10 классов (архив около 920 МБ)
     "GC10": "https://www.kaggle.com/api/v1/datasets/download/zhangyunsheng/defects-class-and-location",
     # X-SDD, репозиторий авторов набора: 7 классов, 1360 снимков
     "X-SDD": "https://github.com/Fighter20092392/X-SDD-A-New-benchmark/archive/refs/heads/main.zip",
