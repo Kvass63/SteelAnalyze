@@ -42,6 +42,7 @@ namespace SteelAnalyze.Services
                 OperatorId = operatorId,
                 PredictedClassId = predictedClass.Id,
                 Similarity = result.Similarity,
+                NeighborVotes = result.Neighbors.Count(n => n.DefectClassId == predictedClass.Id),
                 // Подсказка о возможном втором дефекте: рядом есть эталон другого, критического класса
                 SecondDefectSuspected = result.Neighbors.Any(n =>
                     n.DefectClassId != predictedClass.Id && classes[n.DefectClassId].IsCritical()),

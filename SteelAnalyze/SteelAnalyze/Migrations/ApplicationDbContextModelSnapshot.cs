@@ -92,6 +92,9 @@ namespace SteelAnalyze.Migrations
                     b.Property<DateTime>("InspectedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("NeighborVotes")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("OperatorId")
                         .HasColumnType("INTEGER");
 
