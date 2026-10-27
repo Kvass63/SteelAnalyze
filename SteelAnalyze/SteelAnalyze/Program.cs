@@ -44,8 +44,15 @@ if (File.Exists(modelPath))
     builder.Services.AddSingleton<IEmbeddingExtractor>(new OnnxEmbeddingExtractor(modelPath));
 else
     builder.Services.AddSingleton<IEmbeddingExtractor, UnavailableEmbeddingExtractor>();
-builder.Services.AddScoped<RecognitionService>();
+
+// Работа с базой: контроллеры обращаются к ней только через эти сервисы
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<DefectClassService>();
+builder.Services.AddScoped<ReferenceService>();
 builder.Services.AddScoped<ReferenceImporter>();
+builder.Services.AddScoped<InspectionService>();
+builder.Services.AddScoped<RecognitionService>();
+builder.Services.AddScoped<AnalyticsService>();
 
 var app = builder.Build();
 

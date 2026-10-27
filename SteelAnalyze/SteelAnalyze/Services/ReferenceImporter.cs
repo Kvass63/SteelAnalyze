@@ -16,22 +16,32 @@ namespace SteelAnalyze.Services
         private readonly IEmbeddingExtractor _extractor;
         private readonly ImageStorage _storage;
         private readonly ILogger<ReferenceImporter> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public ReferenceImporter(ApplicationDbContext db, IEmbeddingExtractor extractor, ImageStorage storage, ILogger<ReferenceImporter> logger)
+        public ReferenceImporter(ApplicationDbContext db, IEmbeddingExtractor extractor, ImageStorage storage,
+            ILogger<ReferenceImporter> logger, IWebHostEnvironment environment)
         {
             _db = db;
             _extractor = extractor;
             _storage = storage;
             _logger = logger;
+            _environment = environment;
         }
 
-        // null — другой импорт ещё не закончился
-        public ReferenceImportResult? TryImport(string folder, int adminId)
+        // Относительный путь к папке отсчитывается от папки проекта
+        public ServiceResult<ReferenceImportResult> Import(string folder, int adminId)
         {
-            if (!ImportLock.Wait(0)) return null;
+            if (!_extractor.IsAvailable) return ServiceError.ModelUnavailable();
+
+            var fullPath = Path.GetFullPath(folder, _environment.ContentRootPath);
+            if (!Directory.Exists(fullPath))
+                return ServiceError.InvalidInput($"Папка '{fullPath}' не найдена");
+
+            if (!ImportLock.Wait(0))
+                return ServiceError.Conflict("Импорт эталонов уже выполняется, дождитесь его окончания");
             try
             {
-                return Import(folder, adminId);
+                return ImportFolder(fullPath, adminId);
             }
             finally
             {
@@ -39,7 +49,7 @@ namespace SteelAnalyze.Services
             }
         }
 
-        private ReferenceImportResult Import(string folder, int adminId)
+        private ReferenceImportResult ImportFolder(string folder, int adminId)
         {
             var classes = _db.DefectClasses.ToDictionary(c => c.Code, StringComparer.OrdinalIgnoreCase);
             var knownHashes = _db.ReferenceSamples.Select(r => r.ContentHash).ToHashSet();

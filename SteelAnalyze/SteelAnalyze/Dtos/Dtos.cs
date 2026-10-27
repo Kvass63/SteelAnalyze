@@ -39,6 +39,8 @@ namespace SteelAnalyze.Dtos
 
     // ---------- Ответы ----------
 
+    public record LoginResponse(string Token, string Username, string Role);
+
     public record ReferenceDto(
         int Id,
         int DefectClassId,
@@ -112,5 +114,39 @@ namespace SteelAnalyze.Dtos
                 .OrderBy(n => n.Rank)
                 .Select(n => new NeighborDto(n.Rank, n.DefectClassId, n.DefectClass!.Code, n.DefectClass.Name, n.Similarity, n.ReferenceSampleId))
                 .ToList());
+    }
+
+    // ---------- Строки отчётов ----------
+    // Свойства с init, а не позиционные записи: база должна уметь сортировать по ним (OrderBy после Select)
+
+    public class DefectsByClassRow
+    {
+        public int DefectClassId { get; init; }
+        public string Code { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public int SeverityLevel { get; init; }
+        public bool IsCritical { get; init; }
+        public int Count { get; init; }
+        public double Share { get; init; }             // Доля от всех снимков за период
+        public double AverageSimilarity { get; init; }
+    }
+
+    public class VerdictsByDayRow
+    {
+        public DateTime Date { get; init; }
+        public int Total { get; init; }
+        public int Rejected { get; init; }
+        public int AcceptedWithRemark { get; init; }
+        public int AwaitingReview { get; init; }
+    }
+
+    public class ReferenceCoverageRow
+    {
+        public int DefectClassId { get; init; }
+        public string Code { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public int ReferenceCount { get; init; }
+        public int InspectionCount { get; init; }
+        public double? AverageSimilarity { get; init; } // null, если снимков класса в журнале нет
     }
 }

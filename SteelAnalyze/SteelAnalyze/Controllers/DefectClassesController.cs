@@ -1,91 +1,47 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SteelAnalyze.Auth;
-using SteelAnalyze.Data;
 using SteelAnalyze.Dtos;
 using SteelAnalyze.Models;
+using SteelAnalyze.Services;
 
 namespace SteelAnalyze.Controllers
 {
     [Route("api/defect-classes")]
     [ApiController]
-    public class DefectClassesController : ControllerBase
+    public class DefectClassesController : ApiControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly DefectClassService _classes;
 
-        public DefectClassesController(ApplicationDbContext db)
+        public DefectClassesController(DefectClassService classes)
         {
-            _db = db;
+            _classes = classes;
         }
 
         [HttpGet]
         [Authorize]
-        public ActionResult<IEnumerable<DefectClass>> GetAll() =>
-            Ok(_db.DefectClasses.OrderByDescending(c => c.SeverityLevel).ThenBy(c => c.Code).ToList());
+        public ActionResult<IEnumerable<DefectClass>> GetAll() => Ok(_classes.GetAll());
 
         [HttpGet("{id}")]
         [Authorize]
-        public ActionResult<DefectClass> GetById(int id)
-        {
-            var defectClass = _db.DefectClasses.FirstOrDefault(c => c.Id == id);
-            return defectClass == null ? NotFound() : Ok(defectClass);
-        }
+        public ActionResult<DefectClass> GetById(int id) => OkOrError(_classes.GetById(id));
 
         [HttpPost]
         [Authorize(Roles = Roles.Admin)]
         public ActionResult<DefectClass> Create(DefectClassInput input)
         {
-            if (_db.DefectClasses.Any(c => c.Code == input.Code))
-                return Conflict(new { message = $"Класс с кодом '{input.Code}' уже существует" });
+            var result = _classes.Create(input);
+            if (result.Error != null) return ErrorResponse(result.Error);
 
-            var defectClass = new DefectClass
-            {
-                Code = input.Code,
-                Name = input.Name,
-                Description = input.Description,
-                SeverityLevel = input.SeverityLevel
-            };
-            _db.DefectClasses.Add(defectClass);
-            _db.SaveChanges();
-
-            return CreatedAtAction(nameof(GetById), new { id = defectClass.Id }, defectClass);
+            return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = Roles.Admin)]
-        public IActionResult Update(int id, DefectClassInput input)
-        {
-            var defectClass = _db.DefectClasses.FirstOrDefault(c => c.Id == id);
-            if (defectClass == null) return NotFound();
-            if (_db.DefectClasses.Any(c => c.Code == input.Code && c.Id != id))
-                return Conflict(new { message = $"Класс с кодом '{input.Code}' уже существует" });
-
-            defectClass.Code = input.Code;
-            defectClass.Name = input.Name;
-            defectClass.Description = input.Description;
-            defectClass.SeverityLevel = input.SeverityLevel;
-            _db.SaveChanges();
-
-            return NoContent();
-        }
+        public IActionResult Update(int id, DefectClassInput input) => NoContentOrError(_classes.Update(id, input));
 
         [HttpDelete("{id}")]
         [Authorize(Roles = Roles.Admin)]
-        public IActionResult Delete(int id)
-        {
-            var defectClass = _db.DefectClasses.FirstOrDefault(c => c.Id == id);
-            if (defectClass == null) return NotFound();
-
-            var isUsed = _db.ReferenceSamples.Any(r => r.DefectClassId == id)
-                || _db.Inspections.Any(i => i.PredictedClassId == id)
-                || _db.InspectionNeighbors.Any(n => n.DefectClassId == id);
-            if (isUsed)
-                return Conflict(new { message = "Класс используется в эталонах или журнале и не может быть удалён" });
-
-            _db.DefectClasses.Remove(defectClass);
-            _db.SaveChanges();
-
-            return NoContent();
-        }
+        public IActionResult Delete(int id) => NoContentOrError(_classes.Delete(id));
     }
 }
