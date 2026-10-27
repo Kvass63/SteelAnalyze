@@ -81,14 +81,16 @@ namespace SteelAnalyze.Services
         {
             var inspection = _db.Inspections.FirstOrDefault(i => i.Id == id);
             if (inspection == null) return NotFound(id);
-            if (inspection.Verdict != Verdict.ManualReview)
-                return ServiceError.Conflict("Запись не отправлялась на ручную проверку");
-            if (finalVerdict == Verdict.ManualReview)
-                return ServiceError.InvalidInput("Решение должно быть Rejected или AcceptedWithRemark");
 
-            inspection.Review(finalVerdict, reviewerId, comment);
+            switch (inspection.Review(finalVerdict, reviewerId, comment))
+            {
+                case ReviewOutcome.NotUnderReview:
+                    return ServiceError.Conflict("Запись не отправлялась на ручную проверку");
+                case ReviewOutcome.InvalidVerdict:
+                    return ServiceError.InvalidInput("Решение должно быть Rejected или AcceptedWithRemark");
+            }
+
             _db.SaveChanges();
-
             return ServiceResult.Success;
         }
 

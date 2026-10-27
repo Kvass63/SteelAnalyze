@@ -42,7 +42,7 @@ namespace SteelAnalyze.Services
                 Code = r.Code,
                 Name = r.Name,
                 SeverityLevel = r.SeverityLevel,
-                IsCritical = r.SeverityLevel >= DefectClass.CriticalSeverity,
+                IsCritical = DefectClass.IsCriticalSeverity(r.SeverityLevel),
                 Count = r.Count,
                 Share = (double)r.Count / total,
                 AverageSimilarity = r.AverageSimilarity

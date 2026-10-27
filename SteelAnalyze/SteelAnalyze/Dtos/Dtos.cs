@@ -89,6 +89,7 @@ namespace SteelAnalyze.Dtos
         bool SecondDefectSuspected,
         Verdict Verdict,
         Verdict? FinalVerdict,
+        bool AwaitsReview,
         string? ReviewedBy,
         string? ReviewComment,
         List<NeighborDto> Neighbors)
@@ -108,6 +109,7 @@ namespace SteelAnalyze.Dtos
             i.SecondDefectSuspected,
             i.Verdict,
             i.FinalVerdict,
+            i.AwaitsReview(),
             i.ReviewedBy?.Username,
             i.ReviewComment,
             i.Neighbors

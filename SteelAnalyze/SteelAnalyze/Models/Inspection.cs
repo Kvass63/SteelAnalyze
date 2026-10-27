@@ -17,6 +17,14 @@ namespace SteelAnalyze.Models
         Red     // Система не узнала дефект
     }
 
+    // Исход записи решения инженера
+    public enum ReviewOutcome
+    {
+        Done,            // Решение записано
+        NotUnderReview,  // Запись не отправлялась на ручную проверку
+        InvalidVerdict   // Итоговое решение не может быть ManualReview
+    }
+
     // Запись журнала распознавания: один снимок и результат по нему
     public class Inspection
     {
@@ -84,12 +92,17 @@ namespace SteelAnalyze.Models
         // Бизнес-логика: Ждёт ли запись решения инженера
         public bool AwaitsReview() => Verdict == Verdict.ManualReview && FinalVerdict == null;
 
-        // Бизнес-логика: Запись решения инженера по ручной проверке
-        public void Review(Verdict finalVerdict, int reviewerId, string? comment)
+        // Бизнес-логика: Запись решения инженера по ручной проверке.
+        // Решение можно исправить повторно; поля меняются только при исходе Done
+        public ReviewOutcome Review(Verdict finalVerdict, int reviewerId, string? comment)
         {
+            if (Verdict != Verdict.ManualReview) return ReviewOutcome.NotUnderReview;
+            if (finalVerdict == Verdict.ManualReview) return ReviewOutcome.InvalidVerdict;
+
             FinalVerdict = finalVerdict;
             ReviewedByUserId = reviewerId;
             ReviewComment = comment;
+            return ReviewOutcome.Done;
         }
     }
 

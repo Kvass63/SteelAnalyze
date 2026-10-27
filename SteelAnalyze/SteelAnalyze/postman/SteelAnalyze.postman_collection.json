@@ -2516,6 +2516,7 @@
                   "    pm.expect(r.zone).to.eql('Yellow');",
                   "});",
                   "pm.test('Снимок отправлен на ручную проверку', function () { pm.expect(r.verdict).to.eql('ManualReview'); });",
+                  "pm.test('Запись ждёт решения инженера', function () { pm.expect(r.awaitsReview).to.eql(true); });",
                   "pm.collectionVariables.set('reviewInspectionId', r.id);"
                 ]
               }
@@ -2654,7 +2655,8 @@
                   "pm.test('Решение и инженер сохранены', function () {",
                   "    pm.expect(r.finalVerdict).to.eql('Rejected');",
                   "    pm.expect(r.reviewedBy).to.eql('admin');",
-                  "});"
+                  "});",
+                  "pm.test('Запись больше не ждёт решения инженера', function () { pm.expect(r.awaitsReview).to.eql(false); });"
                 ]
               }
             }

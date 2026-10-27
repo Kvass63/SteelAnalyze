@@ -13,6 +13,9 @@ namespace SteelAnalyze.Models
         public int SeverityLevel { get; set; } // От 1 до 10
 
         // Бизнес-логика: Определение критичности дефекта
-        public bool IsCritical() => SeverityLevel >= CriticalSeverity;
+        public bool IsCritical() => IsCriticalSeverity(SeverityLevel);
+
+        // Бизнес-логика: Критична ли опасность с таким уровнем
+        public static bool IsCriticalSeverity(int severityLevel) => severityLevel >= CriticalSeverity;
     }
 }
