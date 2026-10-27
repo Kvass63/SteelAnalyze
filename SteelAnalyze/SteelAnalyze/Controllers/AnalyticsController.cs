@@ -34,5 +34,10 @@ namespace SteelAnalyze.Controllers
         [Authorize(Roles = Roles.Admin)]
         public ActionResult<IEnumerable<ReferenceCoverageRow>> GetReferenceCoverage() =>
             Ok(_analytics.GetReferenceCoverage());
+
+        // Отчёт 4: Работа операторов за период
+        [HttpGet("operators")]
+        public ActionResult<IEnumerable<OperatorActivityRow>> GetOperatorActivity(DateTime? from, DateTime? to) =>
+            Ok(_analytics.GetOperatorActivity(from, to));
     }
 }

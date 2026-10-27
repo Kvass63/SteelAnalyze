@@ -85,6 +85,31 @@ namespace SteelAnalyze.Services
                 .ThenBy(x => x.Code)
                 .ToList();
 
+        // LINQ ЗАПРОС 4: Работа операторов за период — сколько снимков проверил каждый, сколько среди них брака,
+        // ожидающих ручной проверки и критических дефектов
+        // (Объединение журнала с пользователями и справочником классов через два Join и группировка по оператору)
+        public List<OperatorActivityRow> GetOperatorActivity(DateTime? from, DateTime? to)
+        {
+            var inspections = FilterByPeriod(from, to);
+
+            return (from inspection in inspections
+                    join user in _db.Users on inspection.OperatorId equals user.Id
+                    join defectClass in _db.DefectClasses on inspection.PredictedClassId equals defectClass.Id
+                    group new { inspection, defectClass.SeverityLevel } by new { user.Id, user.Username, user.Role } into g
+                    orderby g.Count() descending, g.Key.Username
+                    select new OperatorActivityRow
+                    {
+                        UserId = g.Key.Id,
+                        Username = g.Key.Username,
+                        Role = g.Key.Role,
+                        Total = g.Count(),
+                        Rejected = g.Count(x => (x.inspection.FinalVerdict ?? x.inspection.Verdict) == Verdict.Rejected),
+                        AwaitingReview = g.Count(x => x.inspection.Verdict == Verdict.ManualReview && x.inspection.FinalVerdict == null),
+                        CriticalDefects = g.Count(x => x.SeverityLevel >= DefectClass.CriticalSeverity),
+                        AverageSimilarity = g.Average(x => x.inspection.Similarity)
+                    }).ToList();
+        }
+
         private IQueryable<Inspection> FilterByPeriod(DateTime? from, DateTime? to)
         {
             IQueryable<Inspection> query = _db.Inspections;

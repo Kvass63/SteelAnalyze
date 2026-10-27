@@ -149,4 +149,16 @@ namespace SteelAnalyze.Dtos
         public int InspectionCount { get; init; }
         public double? AverageSimilarity { get; init; } // null, если снимков класса в журнале нет
     }
+
+    public class OperatorActivityRow
+    {
+        public int UserId { get; init; }
+        public string Username { get; init; } = string.Empty;
+        public string Role { get; init; } = string.Empty;
+        public int Total { get; init; }           // Сколько снимков проверил
+        public int Rejected { get; init; }        // Из них брак (с учётом решения инженера)
+        public int AwaitingReview { get; init; }  // Из них ждут решения инженера
+        public int CriticalDefects { get; init; } // Из них с критическим классом дефекта
+        public double AverageSimilarity { get; init; }
+    }
 }

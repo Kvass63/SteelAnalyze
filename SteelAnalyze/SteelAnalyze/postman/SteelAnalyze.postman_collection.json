@@ -823,6 +823,46 @@
               }
             }
           ]
+        },
+        {
+          "name": "Отчёт 4: работа операторов (Join + Join + GroupBy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/operators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "operators"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Ответ — список', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -2477,6 +2517,51 @@
                   "});",
                   "pm.test('Снимок отправлен на ручную проверку', function () { pm.expect(r.verdict).to.eql('ManualReview'); });",
                   "pm.collectionVariables.set('reviewInspectionId', r.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отчёт 4: снимки оператора попали в отчёт",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/operators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "operators"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "const row = pm.response.json().find(r => r.username === 'operator');",
+                  "pm.test('Оператор есть в отчёте, проверено не меньше 2 снимков', function () {",
+                  "    pm.expect(row).to.be.an('object');",
+                  "    pm.expect(row.total).to.be.at.least(2);",
+                  "});",
+                  "pm.test('Снимок на ручной проверке учтён', function () { pm.expect(row.awaitingReview).to.be.at.least(1); });"
                 ]
               }
             }
