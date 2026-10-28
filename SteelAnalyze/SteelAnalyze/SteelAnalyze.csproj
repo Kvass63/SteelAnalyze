@@ -25,4 +25,9 @@
     <None Include="..\..\training\model.onnx" Link="model.onnx" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Коллекция Postman и настройки инструментов нужны только разработчику -->
+    <Content Update="postman\**;dotnet-tools.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
 </Project>
