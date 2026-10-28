@@ -34,7 +34,7 @@ namespace SteelAnalyze.Services
             {
                 Code = input.Code,
                 Name = input.Name,
-                Description = input.Description,
+                Description = input.Description ?? string.Empty,
                 SeverityLevel = input.SeverityLevel
             };
             _db.DefectClasses.Add(defectClass);
@@ -51,7 +51,7 @@ namespace SteelAnalyze.Services
 
             defectClass.Code = input.Code;
             defectClass.Name = input.Name;
-            defectClass.Description = input.Description;
+            defectClass.Description = input.Description ?? string.Empty;
             defectClass.SeverityLevel = input.SeverityLevel;
             _db.SaveChanges();
 

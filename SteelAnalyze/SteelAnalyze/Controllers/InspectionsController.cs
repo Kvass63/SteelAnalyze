@@ -55,7 +55,7 @@ namespace SteelAnalyze.Controllers
         [HttpPut("{id}/review")]
         [Authorize(Roles = Roles.Admin)]
         public IActionResult Review(int id, ReviewInput input) =>
-            NoContentOrError(_inspections.Review(id, input.FinalVerdict, input.Comment, User.GetUserId()));
+            NoContentOrError(_inspections.Review(id, input.FinalVerdict!.Value, input.Comment, User.GetUserId()));
 
         // DELETE: Удалить запись журнала вместе с файлом снимка (только администратор)
         [HttpDelete("{id}")]

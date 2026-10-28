@@ -27,7 +27,7 @@ namespace SteelAnalyze.Data
                 e.HasOne(r => r.DefectClass).WithMany().HasForeignKey(r => r.DefectClassId).OnDelete(DeleteBehavior.Restrict);
                 e.HasOne(r => r.AddedBy).WithMany().HasForeignKey(r => r.AddedByUserId).OnDelete(DeleteBehavior.Restrict);
 
-                // Поиск повторно загружаемого снимка; не уникальный: у эталонов, добавленных до появления хеша, он пустой
+                // Быстрый поиск повторно загружаемого снимка по хешу содержимого
                 e.HasIndex(r => r.ContentHash);
             });
 

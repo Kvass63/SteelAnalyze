@@ -16,7 +16,7 @@ namespace SteelAnalyze.Dtos
         [Required, RegularExpression("^[a-z0-9_]+$", ErrorMessage = "Код: строчные латинские буквы, цифры и подчёркивание")]
         public string Code { get; set; } = string.Empty;
         [Required] public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; }
         [Range(1, 10)] public int SeverityLevel { get; set; }
     }
 
@@ -33,7 +33,9 @@ namespace SteelAnalyze.Dtos
 
     public class ReviewInput
     {
-        public Verdict FinalVerdict { get; set; }
+        // Nullable, чтобы отсутствующее поле давало 400, а не значение по умолчанию (Rejected)
+        [Required(ErrorMessage = "Укажите решение: Rejected или AcceptedWithRemark")]
+        public Verdict? FinalVerdict { get; set; }
         public string? Comment { get; set; }
     }
 

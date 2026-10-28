@@ -28,9 +28,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-// Перечисления (вердикт, зона) передаются в JSON словами, а не числами
+// Перечисления (вердикт, зона) передаются в JSON словами; числа вместо слов не принимаются
 builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
