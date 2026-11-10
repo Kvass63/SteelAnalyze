@@ -1,0 +1,22 @@
+<mat-toolbar class="toolbar">
+  <a class="home" routerLink="/inspect" aria-label="На главную">
+    <app-logo [height]="40" />
+  </a>
+
+  <span class="spacer"></span>
+
+  @if (auth.isLoggedIn()) {
+    <div class="user">
+      <mat-icon>account_circle</mat-icon>
+      <div class="user-text">
+        <span class="user-name">{{ auth.username() }}</span>
+        <span class="user-role">{{ roleLabel() }}</span>
+      </div>
+    </div>
+
+    <button mat-button class="logout" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Выйти
+    </button>
+  }
+</mat-toolbar>

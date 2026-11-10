@@ -1,0 +1,42 @@
+// :host — сам тег <app-shell>. Растягиваем его на всю высоту окна
+// и раскладываем шапку, середину и подвал столбиком.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// Середина занимает всё свободное место, поэтому подвал прижат к низу окна.
+.body {
+  flex: 1;
+  display: flex;
+}
+
+.menu {
+  flex: 0 0 240px;
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+// На узком экране (телефон) меню переезжает из левой колонки наверх.
+@media (max-width: 760px) {
+  .body {
+    flex-direction: column;
+  }
+
+  .menu {
+    flex-basis: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  .content {
+    padding: 16px;
+  }
+}

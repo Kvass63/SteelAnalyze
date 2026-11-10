@@ -1,0 +1,52 @@
+// Тёмная «стальная» шапка. Цвета берём из темы Material:
+// inverse-surface — тёмный нейтральный фон, inverse-on-surface — светлый текст на нём.
+.toolbar {
+  --mat-toolbar-container-background-color: var(--mat-sys-inverse-surface);
+  --mat-toolbar-container-text-color: var(--mat-sys-inverse-on-surface);
+  height: 64px;
+  gap: 16px;
+}
+
+.home {
+  display: inline-flex;
+  color: inherit;
+  text-decoration: none;
+}
+
+// Пустой растягивающийся элемент: всё, что после него, прижимается к правому краю.
+.spacer {
+  flex: 1;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  font: var(--mat-sys-title-small);
+}
+
+.user-role {
+  font: var(--mat-sys-body-small);
+  opacity: 0.75;
+}
+
+// Кнопка на тёмном фоне: текст и иконка светлые, как вся шапка.
+.logout {
+  --mat-button-text-label-text-color: var(--mat-sys-inverse-on-surface);
+}
+
+// На узком экране оставляем от пользователя только иконку.
+@media (max-width: 600px) {
+  .user-text {
+    display: none;
+  }
+}

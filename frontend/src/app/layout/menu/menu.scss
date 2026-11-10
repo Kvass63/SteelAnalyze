@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+nav {
+  padding: 8px;
+}
+
+// На телефоне пункты меню выстраиваются в строку с прокруткой вбок.
+@media (max-width: 760px) {
+  mat-nav-list {
+    display: flex;
+    overflow-x: auto;
+    padding: 0;
+  }
+
+  a[mat-list-item] {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}

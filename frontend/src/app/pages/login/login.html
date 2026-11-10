@@ -1,0 +1,55 @@
+<div class="login-page">
+  <mat-card class="login-card" appearance="outlined">
+    <mat-card-content>
+      <app-logo class="logo" [height]="56" />
+      <h1 class="title">Вход в систему</h1>
+
+      <!-- [formGroup] связывает тег <form> с объектом form из login.ts,
+           (ngSubmit) вызывает submit() по кнопке или клавише Enter -->
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Логин</mat-label>
+          <!-- formControlName — какое поле формы хранит значение этого input -->
+          <input matInput formControlName="username" autocomplete="username" />
+          <mat-icon matPrefix>person</mat-icon>
+          <!-- mat-error видна, только когда поле тронуто и не прошло проверку -->
+          <mat-error>Введите логин</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Пароль</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            autocomplete="current-password"
+            [type]="hidePassword() ? 'password' : 'text'"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Показать пароль' : 'Скрыть пароль'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          <mat-error>Введите пароль</mat-error>
+        </mat-form-field>
+
+        @if (error(); as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+
+        <!-- Кнопка неактивна, пока поля не заполнены или идёт запрос -->
+        <button mat-flat-button type="submit" class="submit" [disabled]="form.invalid || loading()">
+          @if (loading()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Войти
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

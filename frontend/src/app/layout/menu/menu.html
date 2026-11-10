@@ -1,0 +1,21 @@
+<nav>
+  <mat-nav-list>
+    <!--
+      @for повторяет разметку для каждого пункта массива items.
+      routerLinkActive следит, совпадает ли адрес с link; #active даёт к нему доступ,
+      и через [activated] Material подсвечивает текущий пункт.
+    -->
+    @for (item of items; track item.link) {
+      <a
+        mat-list-item
+        [routerLink]="item.link"
+        routerLinkActive
+        #active="routerLinkActive"
+        [activated]="active.isActive"
+      >
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span matListItemTitle>{{ item.label }}</span>
+      </a>
+    }
+  </mat-nav-list>
+</nav>
