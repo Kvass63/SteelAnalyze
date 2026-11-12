@@ -7,6 +7,10 @@ obj/
 *.user
 release/
 
+# Пакеты npm и кэш сборки Angular (фронтенд)
+node_modules/
+.angular/
+
 # База данных и загруженные снимки
 *.db
 *.db-shm
