@@ -3,7 +3,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Data
 {
-    // Начальное заполнение пустой базы
     public static class DbSeeder
     {
         public static void Seed(ApplicationDbContext db)
@@ -14,7 +13,6 @@ namespace SteelAnalyze.Data
                 db.Users.Add(AppUser.Create("operator", "operator123", Roles.User));
             }
 
-            // 10 классов дефектов; опасность может быть изменена инженером
             if (!db.DefectClasses.Any())
             {
                 db.DefectClasses.AddRange(

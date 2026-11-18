@@ -4,7 +4,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Services
 {
-    // Сводные отчёты по журналу распознавания и базе эталонов
     public class AnalyticsService
     {
         private readonly ApplicationDbContext _db;
@@ -14,8 +13,6 @@ namespace SteelAnalyze.Services
             _db = db;
         }
 
-        // LINQ ЗАПРОС 1: Сколько раз найден каждый класс дефекта за период, его доля и среднее сходство
-        // (Объединение журнала со справочником через Join и группировка через GroupBy)
         public List<DefectsByClassRow> GetDefectsByClass(DateTime? from, DateTime? to)
         {
             var inspections = FilterByPeriod(from, to);
@@ -35,7 +32,6 @@ namespace SteelAnalyze.Services
                             AverageSimilarity = g.Average(i => i.Similarity)
                         }).ToList();
 
-            // Доля и критичность досчитываются уже в памяти
             return rows.Select(r => new DefectsByClassRow
             {
                 DefectClassId = r.Id,
@@ -49,8 +45,6 @@ namespace SteelAnalyze.Services
             }).ToList();
         }
 
-        // LINQ ЗАПРОС 2: Итоги по дням — сколько брака, годных с замечанием и ожидающих ручной проверки
-        // (Группировка по дате и подсчёт с условием; учитывается решение инженера, если оно есть)
         public List<VerdictsByDayRow> GetVerdictsByDay(DateTime? from, DateTime? to) =>
             FilterByPeriod(from, to)
                 .GroupBy(i => i.InspectedAt.Date)
@@ -65,8 +59,6 @@ namespace SteelAnalyze.Services
                 .OrderBy(x => x.Date)
                 .ToList();
 
-        // LINQ ЗАПРОС 3: Покрытие базы эталонов — сколько эталонов у каждого класса и как уверенно он распознаётся
-        // (Подзапросы к эталонам и журналу для каждого класса справочника)
         public List<ReferenceCoverageRow> GetReferenceCoverage() =>
             _db.DefectClasses
                 .Select(c => new ReferenceCoverageRow
@@ -76,7 +68,6 @@ namespace SteelAnalyze.Services
                     Name = c.Name,
                     ReferenceCount = _db.ReferenceSamples.Count(r => r.DefectClassId == c.Id),
                     InspectionCount = _db.Inspections.Count(i => i.PredictedClassId == c.Id),
-                    // null, если снимков этого класса в журнале ещё нет
                     AverageSimilarity = _db.Inspections
                         .Where(i => i.PredictedClassId == c.Id)
                         .Average(i => (double?)i.Similarity)
@@ -85,9 +76,6 @@ namespace SteelAnalyze.Services
                 .ThenBy(x => x.Code)
                 .ToList();
 
-        // LINQ ЗАПРОС 4: Работа операторов за период — сколько снимков проверил каждый, сколько среди них брака,
-        // ожидающих ручной проверки и критических дефектов
-        // (Объединение журнала с пользователями и справочником классов через два Join и группировка по оператору)
         public List<OperatorActivityRow> GetOperatorActivity(DateTime? from, DateTime? to)
         {
             var inspections = FilterByPeriod(from, to);
@@ -114,7 +102,7 @@ namespace SteelAnalyze.Services
         {
             IQueryable<Inspection> query = _db.Inspections;
             if (from != null) query = query.Where(i => i.InspectedAt >= from);
-            if (to != null) query = query.Where(i => i.InspectedAt < to.Value.Date.AddDays(1)); // день "to" входит в период
+            if (to != null) query = query.Where(i => i.InspectedAt < to.Value.Date.AddDays(1));
             return query;
         }
     }

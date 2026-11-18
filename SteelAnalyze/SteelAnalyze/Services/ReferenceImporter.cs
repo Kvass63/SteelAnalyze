@@ -4,12 +4,10 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Services
 {
-    // Загрузка партии эталонов из папки на сервере: <папка>/<код класса>/<снимки>
     public class ReferenceImporter
     {
         private const int SaveBatchSize = 100;
 
-        // Одновременно идёт только один импорт: иначе второй не видит ещё не сохранённые снимки первого и добавляет их повторно
         private static readonly SemaphoreSlim ImportLock = new(1, 1);
 
         private readonly ApplicationDbContext _db;
@@ -28,7 +26,6 @@ namespace SteelAnalyze.Services
             _environment = environment;
         }
 
-        // Относительный путь к папке отсчитывается от папки проекта
         public ServiceResult<ReferenceImportResult> Import(string folder, int adminId)
         {
             if (!_extractor.IsAvailable) return ServiceError.ModelUnavailable();

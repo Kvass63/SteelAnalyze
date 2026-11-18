@@ -8,7 +8,6 @@ using SteelAnalyze.Dtos;
 
 namespace SteelAnalyze.Services
 {
-    // Вход в систему: проверка логина и пароля и выдача JWT
     public class AuthService
     {
         private readonly ApplicationDbContext _db;

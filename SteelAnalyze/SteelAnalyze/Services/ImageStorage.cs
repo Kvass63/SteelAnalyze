@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 
 namespace SteelAnalyze.Services
 {
-    // Хранение снимков файлами на диске; в базе лежит только путь внутри хранилища
     public class ImageStorage
     {
         public const string ReferencesFolder = "references";
@@ -25,7 +24,6 @@ namespace SteelAnalyze.Services
             _root = Path.Combine(environment.ContentRootPath, configuration["Storage:Root"] ?? "storage");
         }
 
-        // Возвращает текст ошибки или null, если файл можно принять
         public static string? Validate(IFormFile? file) =>
             file == null ? "Файл снимка не передан" : Validate(file.FileName, file.Length);
 
@@ -47,7 +45,6 @@ namespace SteelAnalyze.Services
             return buffer.ToArray();
         }
 
-        // Сохраняет файл под новым уникальным именем и возвращает путь внутри хранилища
         public string Save(string folder, string originalFileName, byte[] content)
         {
             var fileName = Guid.NewGuid().ToString("N") + Path.GetExtension(originalFileName).ToLowerInvariant();

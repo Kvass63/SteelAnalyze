@@ -6,7 +6,6 @@ using SteelAnalyze.Services;
 
 namespace SteelAnalyze.Controllers
 {
-    // База эталонов: снимки с известным классом, с которыми сравниваются проверяемые снимки
     [Route("api/references")]
     [ApiController]
     public class ReferencesController : ApiControllerBase
@@ -20,7 +19,6 @@ namespace SteelAnalyze.Controllers
             _importer = importer;
         }
 
-        // READ: Список эталонов, при необходимости только одного класса
         [HttpGet]
         [Authorize]
         public ActionResult<IEnumerable<ReferenceDto>> GetAll(int? defectClassId) => Ok(_references.GetAll(defectClassId));
@@ -29,7 +27,6 @@ namespace SteelAnalyze.Controllers
         [Authorize]
         public ActionResult<ReferenceDto> GetById(int id) => OkOrError(_references.GetById(id));
 
-        // READ: Файл снимка эталона
         [HttpGet("{id}/image")]
         [Authorize]
         public IActionResult GetImage(int id)
@@ -40,7 +37,6 @@ namespace SteelAnalyze.Controllers
             return PhysicalFile(result.Value!, ImageStorage.GetContentType(result.Value!));
         }
 
-        // CREATE: Добавить эталон; эмбеддинг считает сервер (только администратор)
         [HttpPost]
         [Authorize(Roles = Roles.Admin)]
         public ActionResult<ReferenceDto> Create(IFormFile? image, [FromForm] int defectClassId)
@@ -51,19 +47,16 @@ namespace SteelAnalyze.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
         }
 
-        // CREATE: Загрузить партию эталонов из папки на сервере; класс снимка — имя его подпапки (только администратор)
         [HttpPost("import")]
         [Authorize(Roles = Roles.Admin)]
         public ActionResult<ReferenceImportResult> Import(ReferenceImportInput input) =>
             OkOrError(_importer.Import(input.Folder, User.GetUserId()));
 
-        // UPDATE: Исправить класс эталона (только администратор)
         [HttpPut("{id}")]
         [Authorize(Roles = Roles.Admin)]
         public IActionResult Update(int id, ReferenceUpdateInput input) =>
             NoContentOrError(_references.ChangeClass(id, input.DefectClassId));
 
-        // DELETE: Удалить эталон вместе с файлом снимка (только администратор)
         [HttpDelete("{id}")]
         [Authorize(Roles = Roles.Admin)]
         public IActionResult Delete(int id) => NoContentOrError(_references.Delete(id));

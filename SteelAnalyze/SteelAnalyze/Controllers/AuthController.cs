@@ -15,7 +15,6 @@ namespace SteelAnalyze.Controllers
             _auth = auth;
         }
 
-        // Выдача JWT по логину и паролю
         [HttpPost("login")]
         public ActionResult<LoginResponse> Login(LoginRequest request) =>
             OkOrError(_auth.Login(request.Username, request.Password));

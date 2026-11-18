@@ -5,7 +5,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Services
 {
-    // База эталонов: снимки с известным классом, с которыми сравниваются проверяемые снимки
     public class ReferenceService
     {
         private readonly ApplicationDbContext _db;
@@ -19,7 +18,6 @@ namespace SteelAnalyze.Services
             _storage = storage;
         }
 
-        // Список эталонов, при необходимости только одного класса
         public List<ReferenceDto> GetAll(int? defectClassId)
         {
             var query = WithDetails();
@@ -36,7 +34,6 @@ namespace SteelAnalyze.Services
             return ReferenceDto.From(reference);
         }
 
-        // Полный путь к файлу снимка эталона на диске
         public ServiceResult<string> GetImageFullPath(int id)
         {
             var reference = _db.ReferenceSamples.FirstOrDefault(r => r.Id == id);
@@ -48,7 +45,6 @@ namespace SteelAnalyze.Services
             return fullPath;
         }
 
-        // Добавить эталон; эмбеддинг считается по снимку
         public ServiceResult<ReferenceDto> Create(IFormFile? image, int defectClassId, int adminId)
         {
             if (!_extractor.IsAvailable) return ServiceError.ModelUnavailable();
@@ -88,7 +84,6 @@ namespace SteelAnalyze.Services
             return ReferenceDto.From(WithDetails().First(r => r.Id == reference.Id));
         }
 
-        // Исправить класс эталона
         public ServiceResult ChangeClass(int id, int defectClassId)
         {
             var reference = _db.ReferenceSamples.FirstOrDefault(r => r.Id == id);
@@ -101,7 +96,6 @@ namespace SteelAnalyze.Services
             return ServiceResult.Success;
         }
 
-        // Удалить эталон вместе с файлом снимка
         public ServiceResult Delete(int id)
         {
             var reference = _db.ReferenceSamples.FirstOrDefault(r => r.Id == id);

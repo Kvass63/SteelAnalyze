@@ -4,7 +4,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Services
 {
-    // Справочник классов дефектов
     public class DefectClassService
     {
         private readonly ApplicationDbContext _db;
@@ -14,7 +13,6 @@ namespace SteelAnalyze.Services
             _db = db;
         }
 
-        // Сначала самые опасные классы
         public List<DefectClass> GetAll() =>
             _db.DefectClasses.OrderByDescending(c => c.SeverityLevel).ThenBy(c => c.Code).ToList();
 
@@ -58,7 +56,6 @@ namespace SteelAnalyze.Services
             return ServiceResult.Success;
         }
 
-        // Класс нельзя удалить, пока на него ссылаются эталоны или журнал
         public ServiceResult Delete(int id)
         {
             var defectClass = _db.DefectClasses.FirstOrDefault(c => c.Id == id);
