@@ -1,0 +1,39 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    gap: 24px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.menu {
+    display: flex;
+    gap: 4px;
+}
+
+.active {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.content {
+    flex: 1;
+    padding: 24px;
+}
+
+.footer {
+    padding: 12px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: gray;
+    border-top: 1px solid #ddd;
+}
