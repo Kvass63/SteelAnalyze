@@ -1,1 +1,29 @@
-<p>login works!</p>
+<mat-card class="login-card">
+    <mat-card-header>
+        <mat-card-title>Вход в SteelAnalyzee</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+        <form #form="ngForm" (ngSubmit)="submit()">
+            <mat-form-field>
+                <mat-label>lЛогин</mat-label>
+                <input matInput name="username" [(ngModel)]="username" required>
+                <mat-error>Введите логин</mat-error>
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Пароль</mat-label>
+                <input matInput type="password" name="password" [(ngModel)]="password"
+                    required>
+                <mat-error>Введите пароль</mat-error>
+                
+            </mat-form-field>
+
+            @if (error()) {
+                <p class="error">{{ error() }}</p>
+            }
+
+            <button mat-flat-button type="submit" [disabled]="form.invalid || loading()">Войти</button>
+        </form>
+    </mat-card-content>
+</mat-card>
