@@ -17,7 +17,7 @@ namespace SteelAnalyze.Services
             _storage = storage;
         }
 
-        public Inspection Inspect(byte[] image, string fileName, int operatorId)
+        public ServiceResult<Inspection> Inspect(byte[] image, string fileName, int operatorId)
         {
             var embedding = _extractor.Extract(image);
 
@@ -33,6 +33,10 @@ namespace SteelAnalyze.Services
 
             var classes = _db.DefectClasses.ToDictionary(c => c.Id);
             var predictedClass = classes[result.PredictedClassId];
+            if (predictedClass.IsForeign())
+            {
+                return ServiceError.ForeignObject();
+            }
 
             var inspection = new Inspection
             {

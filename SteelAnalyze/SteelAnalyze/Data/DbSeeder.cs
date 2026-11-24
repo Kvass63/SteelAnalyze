@@ -28,6 +28,11 @@ namespace SteelAnalyze.Data
                     new DefectClass { Code = "stain", Name = "Пятно", SeverityLevel = 2, Description = "Локальное изменение цвета без нарушения рельефа" });
             }
 
+            if (!db.DefectClasses.Any(c => c.Code == DefectClass.ForeignCode))
+            {
+                db.DefectClasses.Add(new DefectClass { Code = DefectClass.ForeignCode, Name = "Не сталь", SeverityLevel = 1, Description = "Изображение не является поверхностью стали (посторонний объект)" });
+            }
+
             db.SaveChanges();
         }
     }

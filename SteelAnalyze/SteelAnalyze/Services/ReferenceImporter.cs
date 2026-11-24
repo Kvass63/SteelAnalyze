@@ -82,6 +82,12 @@ namespace SteelAnalyze.Services
                         continue;
                     }
 
+                    if (ImageColorCheck.IsColored(content))
+                    {
+                        failedFiles.Add($"{code}/{fileName}");
+                        continue;
+                    }
+
                     float[] embedding;
                     try
                     {

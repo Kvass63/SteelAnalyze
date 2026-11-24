@@ -57,6 +57,7 @@ namespace SteelAnalyze.Services
             var hash = ImageStorage.GetContentHash(content);
             if (_db.ReferenceSamples.Any(r => r.ContentHash == hash))
                 return ServiceError.Conflict("Этот снимок уже есть среди эталонов");
+            if (ImageColorCheck.IsColored(content)) return ServiceError.ColoredImage();
 
             float[] embedding;
             try

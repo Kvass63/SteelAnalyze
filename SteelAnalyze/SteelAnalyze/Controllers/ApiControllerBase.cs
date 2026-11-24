@@ -20,6 +20,7 @@ namespace SteelAnalyze.Controllers
                 ServiceErrorKind.InvalidInput => StatusCodes.Status400BadRequest,
                 ServiceErrorKind.InvalidCredentials => StatusCodes.Status401Unauthorized,
                 ServiceErrorKind.ModelUnavailable => StatusCodes.Status503ServiceUnavailable,
+                ServiceErrorKind.NotSteelSurface => StatusCodes.Status422UnprocessableEntity,
                 _ => StatusCodes.Status500InternalServerError
             };
 

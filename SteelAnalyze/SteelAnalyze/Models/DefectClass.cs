@@ -1,8 +1,10 @@
 namespace SteelAnalyze.Models
 {
     public class DefectClass
-    {
+    {   
         public const int CriticalSeverity = 8;
+
+        public const string ForeignCode = "foreign";
 
         public int Id { get; set; }
         public string Code { get; set; } = string.Empty;
@@ -11,6 +13,8 @@ namespace SteelAnalyze.Models
         public int SeverityLevel { get; set; }
 
         public bool IsCritical() => IsCriticalSeverity(SeverityLevel);
+
+        public bool IsForeign() => Code == ForeignCode;
 
         public static bool IsCriticalSeverity(int severityLevel) => severityLevel >= CriticalSeverity;
     }

@@ -29,15 +29,24 @@ namespace SteelAnalyze.Services
             if (!_db.ReferenceSamples.Any(r => r.ModelVersion == _extractor.ModelVersion))
                 return ServiceError.Conflict("База эталонов пуста: распознавать не с чем");
 
-            Inspection inspection;
+            var content = ImageStorage.ReadAllBytes(image!);
+            if (ImageColorCheck.IsColored(content)) return ServiceError.ColoredImage();
+
+            ServiceResult<Inspection> result; 
             try
             {
-                inspection = _recognition.Inspect(ImageStorage.ReadAllBytes(image!), image!.FileName, operatorId);
+                result = _recognition.Inspect(content, image!.FileName, operatorId);
             }
             catch (InvalidDataException)
             {
                 return ServiceError.InvalidInput("Файл не является изображением");
             }
+            if (result.Error != null)
+            {
+                return result.Error;
+            }
+
+            var inspection = result.Value!;
 
             return InspectionDto.From(WithDetails().First(i => i.Id == inspection.Id));
         }

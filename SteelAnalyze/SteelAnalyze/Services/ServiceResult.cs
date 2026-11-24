@@ -6,7 +6,8 @@ namespace SteelAnalyze.Services
         Conflict,
         InvalidInput,
         InvalidCredentials,
-        ModelUnavailable
+        ModelUnavailable,
+        NotSteelSurface
     }
 
     public record ServiceError(ServiceErrorKind Kind, string Message)
@@ -16,6 +17,10 @@ namespace SteelAnalyze.Services
         public static ServiceError InvalidInput(string message) => new(ServiceErrorKind.InvalidInput, message);
         public static ServiceError InvalidCredentials() => new(ServiceErrorKind.InvalidCredentials, "Неверный логин или пароль");
         public static ServiceError ModelUnavailable() => new(ServiceErrorKind.ModelUnavailable, "Модель распознавания не загружена");
+        public static ServiceError ColoredImage() =>
+            new(ServiceErrorKind.NotSteelSurface, "Снимок не похож на поверхность стали: изображение цветное");
+        public static ServiceError ForeignObject() =>
+            new(ServiceErrorKind.NotSteelSurface, "Снимок не похож на поверхность стали: ближайшие эталоны — посторонние объекты");
     }
 
     public class ServiceResult
