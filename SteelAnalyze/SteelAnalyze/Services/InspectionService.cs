@@ -5,7 +5,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Services
 {
-    // Журнал распознавания
     public class InspectionService
     {
         private readonly ApplicationDbContext _db;
@@ -21,7 +20,6 @@ namespace SteelAnalyze.Services
             _storage = storage;
         }
 
-        // Проверить снимок: распознать дефект, вынести вердикт и записать в журнал
         public ServiceResult<InspectionDto> Create(IFormFile? image, int operatorId)
         {
             if (!_extractor.IsAvailable) return ServiceError.ModelUnavailable();
@@ -31,25 +29,33 @@ namespace SteelAnalyze.Services
             if (!_db.ReferenceSamples.Any(r => r.ModelVersion == _extractor.ModelVersion))
                 return ServiceError.Conflict("База эталонов пуста: распознавать не с чем");
 
-            Inspection inspection;
+            var content = ImageStorage.ReadAllBytes(image!);
+            if (ImageColorCheck.IsColored(content)) return ServiceError.ColoredImage();
+
+            ServiceResult<Inspection> result; 
             try
             {
-                inspection = _recognition.Inspect(ImageStorage.ReadAllBytes(image!), image!.FileName, operatorId);
+                result = _recognition.Inspect(content, image!.FileName, operatorId);
             }
             catch (InvalidDataException)
             {
                 return ServiceError.InvalidInput("Файл не является изображением");
             }
+            if (result.Error != null)
+            {
+                return result.Error;
+            }
+
+            var inspection = result.Value!;
 
             return InspectionDto.From(WithDetails().First(i => i.Id == inspection.Id));
         }
 
-        // Журнал с фильтрами по периоду, классу и вердикту системы; сначала новые записи
         public List<InspectionDto> GetAll(DateTime? from, DateTime? to, int? defectClassId, Verdict? verdict)
         {
             var query = WithDetails();
             if (from != null) query = query.Where(i => i.InspectedAt >= from);
-            if (to != null) query = query.Where(i => i.InspectedAt < to.Value.Date.AddDays(1)); // день "to" входит в период
+            if (to != null) query = query.Where(i => i.InspectedAt < to.Value.Date.AddDays(1));
             if (defectClassId != null) query = query.Where(i => i.PredictedClassId == defectClassId);
             if (verdict != null) query = query.Where(i => i.Verdict == verdict);
 
@@ -64,7 +70,6 @@ namespace SteelAnalyze.Services
             return InspectionDto.From(inspection);
         }
 
-        // Полный путь к файлу проверенного снимка на диске
         public ServiceResult<string> GetImageFullPath(int id)
         {
             var inspection = _db.Inspections.FirstOrDefault(i => i.Id == id);
@@ -76,7 +81,6 @@ namespace SteelAnalyze.Services
             return fullPath;
         }
 
-        // Решение инженера по снимку, отправленному на ручную проверку
         public ServiceResult Review(int id, Verdict finalVerdict, string? comment, int reviewerId)
         {
             var inspection = _db.Inspections.FirstOrDefault(i => i.Id == id);
@@ -94,7 +98,6 @@ namespace SteelAnalyze.Services
             return ServiceResult.Success;
         }
 
-        // Удалить запись журнала вместе с файлом снимка
         public ServiceResult Delete(int id)
         {
             var inspection = _db.Inspections.FirstOrDefault(i => i.Id == id);

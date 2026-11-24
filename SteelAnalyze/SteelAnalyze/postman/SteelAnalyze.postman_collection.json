@@ -30,6 +30,10 @@
       "value": "D:/BalpeisovLabs/SteelAnalyze/training/dataset/images"
     },
     {
+      "key": "foreignDir",
+      "value": "D:/BalpeisovLabs/SteelAnalyze/training/_downloads/foreign_refs"
+    },
+    {
       "key": "scratchClassId",
       "value": "0"
     },
@@ -354,6 +358,7 @@
                 "exec": [
                   "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
                   "pm.test('В справочнике есть классы', function () { pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty; });",
+                  "pm.test('Есть класс «Не сталь» (foreign)', function () { pm.expect(pm.response.json().map(c => c.code)).to.include('foreign'); });",
                   "if (pm.response.code === 200) { pm.collectionVariables.set('defectClassId', pm.response.json()[0].id); }"
                 ]
               }
@@ -2292,6 +2297,58 @@
           ]
         },
         {
+          "name": "Импорт посторонних (foreign)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/references/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references",
+                "import"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"folder\":\"{{foreignDir}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "const r = pm.response.json();",
+                  "pm.test('Подпапка foreign — код класса', function () { pm.expect(r.unknownClasses).to.be.empty; });",
+                  "pm.test('Все файлы серые и приняты', function () { pm.expect(r.failedFiles).to.be.empty; });",
+                  "pm.test('Посторонние добавлены или уже были в базе', function () { pm.expect(r.added + r.duplicates).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Повторный импорт val: только повторы",
           "request": {
             "method": "POST",
@@ -2546,6 +2603,60 @@
           ]
         },
         {
+          "name": "Ёлка как эталон (422)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/references",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "references"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "samples/christmas_tree.jpg"
+                },
+                {
+                  "key": "defectClassId",
+                  "value": "{{scratchClassId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Сообщение: снимок не похож на сталь', function () { pm.expect(pm.response.json().message).to.include('не похож на поверхность стали'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Проверить снимок (operator)",
           "request": {
             "method": "POST",
@@ -2648,6 +2759,147 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Статус 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Проверить цветную ёлку (422)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "samples/christmas_tree.jpg"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Сообщение: изображение цветное', function () { pm.expect(pm.response.json().message).to.include('цветное'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Проверить серую ёлку (422)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "samples/christmas_tree_gray.jpg"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Сообщение: ближайшие эталоны — посторонние', function () { pm.expect(pm.response.json().message).to.include('посторонние объекты'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Журнал: ёлок нет",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inspections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inspections"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Отклонённые ёлки не сохранены в журнал', function () {",
+                  "    const names = pm.response.json().map(i => i.originalFileName);",
+                  "    pm.expect(names).to.not.include('christmas_tree.jpg');",
+                  "    pm.expect(names).to.not.include('christmas_tree_gray.jpg');",
+                  "});"
                 ]
               }
             }

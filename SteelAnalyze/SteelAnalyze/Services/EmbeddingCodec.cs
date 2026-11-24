@@ -1,6 +1,5 @@
 namespace SteelAnalyze.Services
 {
-    // Перевод эмбеддинга в набор байтов для хранения в базе и обратно
     public static class EmbeddingCodec
     {
         public static byte[] ToBytes(float[] embedding)

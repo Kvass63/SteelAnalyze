@@ -3,8 +3,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Dtos
 {
-    // ---------- Входные данные ----------
-
     public class LoginRequest
     {
         [Required] public string Username { get; set; } = string.Empty;
@@ -27,19 +25,15 @@ namespace SteelAnalyze.Dtos
 
     public class ReferenceImportInput
     {
-        // Папка на сервере с подпапками по кодам классов: <Folder>/crack/*.jpg, <Folder>/hole/*.jpg, ...
         [Required] public string Folder { get; set; } = string.Empty;
     }
 
     public class ReviewInput
     {
-        // Nullable, чтобы отсутствующее поле давало 400, а не значение по умолчанию (Rejected)
         [Required(ErrorMessage = "Укажите решение: Rejected или AcceptedWithRemark")]
         public Verdict? FinalVerdict { get; set; }
         public string? Comment { get; set; }
     }
-
-    // ---------- Ответы ----------
 
     public record LoginResponse(string Token, string Username, string Role);
 
@@ -63,10 +57,10 @@ namespace SteelAnalyze.Dtos
     }
 
     public record ReferenceImportResult(
-        int Added,                  // Добавлено эталонов
-        int Duplicates,             // Пропущено: такой снимок уже есть среди эталонов
-        List<string> UnknownClasses, // Подпапки, для которых нет класса с таким кодом
-        List<string> FailedFiles);  // Файлы, которые не удалось принять как снимок
+        int Added,
+        int Duplicates,
+        List<string> UnknownClasses,
+        List<string> FailedFiles);
 
     public record NeighborDto(
         int Rank,
@@ -120,9 +114,6 @@ namespace SteelAnalyze.Dtos
                 .ToList());
     }
 
-    // ---------- Строки отчётов ----------
-    // Свойства с init, а не позиционные записи: база должна уметь сортировать по ним (OrderBy после Select)
-
     public class DefectsByClassRow
     {
         public int DefectClassId { get; init; }
@@ -131,7 +122,7 @@ namespace SteelAnalyze.Dtos
         public int SeverityLevel { get; init; }
         public bool IsCritical { get; init; }
         public int Count { get; init; }
-        public double Share { get; init; }             // Доля от всех снимков за период
+        public double Share { get; init; }
         public double AverageSimilarity { get; init; }
     }
 
@@ -151,7 +142,7 @@ namespace SteelAnalyze.Dtos
         public string Name { get; init; } = string.Empty;
         public int ReferenceCount { get; init; }
         public int InspectionCount { get; init; }
-        public double? AverageSimilarity { get; init; } // null, если снимков класса в журнале нет
+        public double? AverageSimilarity { get; init; }
     }
 
     public class OperatorActivityRow
@@ -159,10 +150,10 @@ namespace SteelAnalyze.Dtos
         public int UserId { get; init; }
         public string Username { get; init; } = string.Empty;
         public string Role { get; init; } = string.Empty;
-        public int Total { get; init; }           // Сколько снимков проверил
-        public int Rejected { get; init; }        // Из них брак (с учётом решения инженера)
-        public int AwaitingReview { get; init; }  // Из них ждут решения инженера
-        public int CriticalDefects { get; init; } // Из них с критическим классом дефекта
+        public int Total { get; init; }
+        public int Rejected { get; init; }
+        public int AwaitingReview { get; init; }
+        public int CriticalDefects { get; init; }
         public double AverageSimilarity { get; init; }
     }
 }

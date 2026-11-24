@@ -24,7 +24,6 @@ namespace SteelAnalyze.Auth
             };
         }
 
-        // Бизнес-логика: проверка пароля без хранения его в открытом виде
         public bool VerifyPassword(string password) =>
             CryptographicOperations.FixedTimeEquals(PasswordHash, Hash(password, PasswordSalt));
 

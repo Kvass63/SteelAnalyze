@@ -28,7 +28,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-// Перечисления (вердикт, зона) передаются в JSON словами; числа вместо слов не принимаются
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddEndpointsApiExplorer();
@@ -38,14 +37,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddSingleton<ImageStorage>();
-// Нейросеть: файл модели лежит рядом с программой; без него сервер работает, но распознавание отвечает 503
 var modelPath = Path.Combine(AppContext.BaseDirectory, builder.Configuration["Model:Path"] ?? "model.onnx");
 if (File.Exists(modelPath))
     builder.Services.AddSingleton<IEmbeddingExtractor>(new OnnxEmbeddingExtractor(modelPath));
 else
     builder.Services.AddSingleton<IEmbeddingExtractor, UnavailableEmbeddingExtractor>();
 
-// Работа с базой: контроллеры обращаются к ней только через эти сервисы
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DefectClassService>();
 builder.Services.AddScoped<ReferenceService>();
@@ -56,7 +53,6 @@ builder.Services.AddScoped<AnalyticsService>();
 
 var app = builder.Build();
 
-// Создание и обновление базы по миграциям, начальное заполнение, пересчёт эталонов после замены модели
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -76,7 +72,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// В разработке не перенаправляем http -> https: при редиректе клиенты (Postman) отбрасывают заголовок Authorization
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();

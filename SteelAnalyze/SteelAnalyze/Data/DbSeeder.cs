@@ -3,7 +3,6 @@ using SteelAnalyze.Models;
 
 namespace SteelAnalyze.Data
 {
-    // Начальное заполнение пустой базы
     public static class DbSeeder
     {
         public static void Seed(ApplicationDbContext db)
@@ -14,7 +13,6 @@ namespace SteelAnalyze.Data
                 db.Users.Add(AppUser.Create("operator", "operator123", Roles.User));
             }
 
-            // 10 классов дефектов; опасность может быть изменена инженером
             if (!db.DefectClasses.Any())
             {
                 db.DefectClasses.AddRange(
@@ -28,6 +26,11 @@ namespace SteelAnalyze.Data
                     new DefectClass { Code = "oxide_scale", Name = "Окалина", SeverityLevel = 5, Description = "Окисленный слой, оставшийся после горячей обработки" },
                     new DefectClass { Code = "scratch", Name = "Царапина", SeverityLevel = 4, Description = "Узкая канавка от контакта с острыми предметами или абразивом" },
                     new DefectClass { Code = "stain", Name = "Пятно", SeverityLevel = 2, Description = "Локальное изменение цвета без нарушения рельефа" });
+            }
+
+            if (!db.DefectClasses.Any(c => c.Code == DefectClass.ForeignCode))
+            {
+                db.DefectClasses.Add(new DefectClass { Code = DefectClass.ForeignCode, Name = "Не сталь", SeverityLevel = 1, Description = "Изображение не является поверхностью стали (посторонний объект)" });
             }
 
             db.SaveChanges();

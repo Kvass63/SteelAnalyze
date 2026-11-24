@@ -2,8 +2,6 @@ using SteelAnalyze.Data;
 
 namespace SteelAnalyze.Services
 {
-    // Пересчёт эмбеддингов эталонов после замены модели: новые эмбеддинги нельзя сравнивать со старыми,
-    // поэтому эталоны, посчитанные другой моделью, пересчитываются по сохранённым снимкам
     public static class ReferenceEmbeddingUpdater
     {
         private const int SaveBatchSize = 100;
@@ -23,7 +21,6 @@ namespace SteelAnalyze.Services
                 var fullPath = storage.GetFullPath(reference.ImagePath);
                 if (!File.Exists(fullPath))
                 {
-                    // Такой эталон не участвует в распознавании, пока его не удалят или не загрузят заново
                     logger.LogWarning("Эталон {Id}: файл снимка {Path} отсутствует, эмбеддинг не пересчитан", reference.Id, reference.ImagePath);
                     continue;
                 }
