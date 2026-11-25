@@ -1,3 +1,19 @@
 .error {
     color: #c62828;
 }
+
+.critical {
+    color: #c62828;
+    font-weight: 500;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}

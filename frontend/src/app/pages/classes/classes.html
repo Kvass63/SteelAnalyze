@@ -4,8 +4,20 @@
     <p class="error">{{ error() }}</p>
 }
 
-<ul>
+<table matSort (matSortChange)="onSort($event)" matSortDisableClear>
+    <tr>
+        <th mat-sort-header="name">Название</th>
+        <th mat-sort-header="code">Код</th>
+        <th>Описание</th>
+        <th mat-sort-header="severityLevel">Опасность</th>
+    </tr>
+
     @for (item of classes(); track item.id) {
-        <li>{{ item.name }} ({{ item.code }}), опасность {{ item.severityLevel }}</li>
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.code }}</td>
+            <td>{{ item.description }}</td>
+            <td [class.critical]="item.severityLevel >= 8">{{ item.severityLevel }}</td>
+        </tr>
     }
-</ul>
+</table>
