@@ -1,1 +1,11 @@
-<p>classes works!</p>
+<h1>Классы дефектов</h1>
+
+@if (error()) {
+    <p class="error">{{ error() }}</p>
+}
+
+<ul>
+    @for (item of classes(); track item.id) {
+        <li>{{ item.name }} ({{ item.code }}), опасность {{ item.severityLevel }}</li>
+    }
+</ul>
