@@ -5,14 +5,15 @@ import { Inspections } from './pages/inspections/inspections';
 import { Classes } from './pages/classes/classes';
 import { ClassForm } from './pages/class-form/class-form';
 import { NotFound } from './pages/not-found/not-found';
+import { authGuard } from './services/auth-guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'inspect', pathMatch: 'full' },
     { path: 'login', component: Login },
-    { path: 'inspect', component: Inspect },
-    { path: 'inspections', component: Inspections },
-    { path: 'classes', component: Classes },
-    { path: 'classes/new', component: ClassForm },
-    { path: 'classes/:id/edit', component: ClassForm },
+    { path: 'inspect', component: Inspect, canActivate: [authGuard] },
+    { path: 'inspections', component: Inspections, canActivate: [authGuard] },
+    { path: 'classes', component: Classes, canActivate: [authGuard] },
+    { path: 'classes/new', component: ClassForm, canActivate: [authGuard] },
+    { path: 'classes/:id/edit', component: ClassForm, canActivate: [authGuard] },
     { path: '**', component: NotFound },
 ];

@@ -3,12 +3,21 @@
     <img src="logo.svg" alt="Логотип" width="36" height="36">
     <span>SteelAnalyze</span>
   </a>
+  @if (auth.user(); as user) {
+    <nav class="menu">
+      <a mat-button routerLink="/inspect" routerLinkActive="active">Проверка снимка</a>
+      <a mat-button routerLink="/inspections" routerLinkActive="active">Журнал</a>
+      <a mat-button routerLink="/classes" routerLinkActive="active">Классы дефектов</a>
+    </nav>
 
-  <nav class="menu">
-    <a mat-button routerLink="/inspect" routerLinkActive="active">Проверка снимка</a>
-    <a mat-button routerLink="/inspections" routerLinkActive="active">Журнал</a>
-    <a mat-button routerLink="/classes" routerLinkActive="active">Классы дефектов</a>
-  </nav>
+    <span class="spacer"></span>
+
+    <div class="user">
+      <span class="user-name">{{ user.username }}</span>
+      <span class="user-role">{{ auth.isAdmin() ? 'администратор' : 'оператор' }}</span>
+    </div>
+    <button mat-stroked-button (click)="auth.logout()">Выйти</button>
+  }
 </mat-toolbar>
 
 <main class="content">
